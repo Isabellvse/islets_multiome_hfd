@@ -109,9 +109,14 @@ my_theme <- function() {
     )
 }
 
-my_theme_void <- function() {
-  ggplot2::theme_void(base_size = 6) +
-    ggplot2::theme(strip.text = element_blank())
+my_theme_void <- function(remove_strip_text = TRUE) {
+  base_theme <- ggplot2::theme_void(base_size = 6)
+  
+  if (remove_strip_text) {
+    base_theme <- base_theme + ggplot2::theme(strip.text = ggplot2::element_blank())
+  }
+  
+  base_theme
 }
 
 
@@ -307,5 +312,12 @@ evaluateEmbedding <- function(x, metadata, dims, batch_var, label_var, cl.min = 
   
   # Return
   list(summary = summary, cluster_metrics = clustering_metrics, ASW = asw, LISI = lisi, clusters = cluster_list)
+}
+
+rna_to_atac_syntax <- function(vec){
+  output <- vec %>%
+    stringi::stri_replace_last_regex("[_]", "#") %>%
+    stringi::stri_join("-1")
+  return(output)
 }
 
