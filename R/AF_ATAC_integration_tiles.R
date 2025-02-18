@@ -10,20 +10,21 @@ ArchR::addArchRGenome("mm10")
 create_directories(c(here::here("data/dimensional_reduction"), 
                      here::here("data/dimensional_reduction/atac")))
 # Load --------------------------------------------------------------------
-multi_islets_3 <- loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_2/"))
+multi_islets_3 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_2/"))
 
-saveArchRProject(ArchRProj = multi_islets_3,
+saveArchRProject(ArchR::ArchRProj = multi_islets_3,
                  outputDirectory = here::here("data/archr_projects/save_multi_islets_3"),
+                 threads = parallel::detectCores() - 1,
                  load = FALSE)
 
-multi_islets_3 <- loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_3/"))
+multi_islets_3 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_3/"))
 
 # Create 5000 bp tile matrix ----------------------------------------------
 # Add 5000 bp tile matrix
 multi_islets_3 <- ArchR::addTileMatrix(
   input = multi_islets_3,
   tileSize = 5000,
-  threads = 1,
+  threads = parallel::detectCores() - 1,
   force = TRUE)
 
 # Dimensional reduction ---------------------------------------------------
@@ -35,6 +36,7 @@ multi_islets_3 <-
     useMatrix = "TileMatrix",
     name = "IterativeLSI",
     iterations = 4,
+    threads = parallel::detectCores() - 1,
     clusterParams = list( #See Seurat::FindClusters
       resolution = c(0.2),
       sampleCells = 10000,
@@ -46,14 +48,15 @@ multi_islets_3 <-
 
 # save archer project
 ArchR::saveArchRProject(ArchRProj = multi_islets_3,
-                 outputDirectory = here::here("archr_projects/save_multi_islets_3"),
+                 outputDirectory = here::here("data/archr_projects/save_multi_islets_3"),
+                 threads = parallel::detectCores() - 1,
                  load = FALSE)
 
 
 # Get variable features ---------------------------------------------------
 # Load variable features used in LSI, make each fature the syntax "chr-start-end" and convert to vector
 variable_features <- multi_islets_3@reducedDims$IterativeLSI@listData[["LSIFeatures"]] %>%
-  as.data.frame() %>%
+  BiocGenerics::as.data.frame() %>%
   dplyr::mutate(end = (start + 5000) - 1, # Create column of end position of bin.
                 feature = paste0(seqnames, "-", start, "-", end)) %>% # create row data chr-start-end
   dplyr::pull(feature) # create vector
@@ -65,7 +68,7 @@ tiles <- ArchR::getMatrixFromProject(
   useSeqnames = NULL,
   verbose = TRUE,
   binarize = TRUE,
-  threads = 1,
+  threads = parallel::detectCores() - 1,
   logFile = createLogFile("getMatrixFromProject")
 )
 
