@@ -9,15 +9,15 @@ set.seed(1000)
 # Setting a Genome and GeneAnnotation
 ArchR::addArchRGenome("mm10")
 
-
 # Load --------------------------------------------------------------------
-multi_islets_2 <- ArchR::loadArchRProject(path = here::here("archr_projects/save_multi_islets_1/"))
+multi_islets_2 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_1/"))
 
 ArchR::saveArchRProject(ArchRProj = multi_islets_2,
-                 outputDirectory = here::here("archr_projects/save_multi_islets_2"),
+                 outputDirectory = here::here("data/archr_projects/save_multi_islets_2"),
+                 threads = parallel::detectCores() - 1,
                  load = FALSE)
 
-multi_islets_2 <- ArchR::loadArchRProject(path = here::here("archr_projects/save_multi_islets_2/"))
+multi_islets_2 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_2/"))
 
 # Barcodes to keep
 bar_keep <- base::readRDS(here::here("data/quality_control/rna_atac_barcode_keep.rds"))
@@ -26,9 +26,9 @@ bar_keep <- base::readRDS(here::here("data/quality_control/rna_atac_barcode_keep
 db <- base::readRDS(here::here("data/quality_control/rna/ALL_polyhormone_cells_remove.rds"))
 
 # Meta data
-meta <- as.data.frame(readxl::read_excel(here::here("data/meta.xlsx"),
+meta <- BiocGenerics::as.data.frame(readxl::read_excel(here::here("data/meta.xlsx"),
                                          sheet = "Sheet1")) %>%
-  rename_with(snakecase::to_snake_case) %>%
+  dplyr::rename_with(snakecase::to_snake_case) %>%
   dplyr::filter(library == "ATAC") %>% # keep rows from ATA
   dplyr::mutate(condition = stringr::str_c(diet,
                                            time,
@@ -45,16 +45,17 @@ bar_keep <- bar_keep[!bar_keep %in% db]
 multi_islets_2 <- subsetArchRProject(
   ArchRProj = multi_islets_2,
   cells = rna_to_atac_syntax(bar_keep),
-  outputDirectory = "archr_projects/save_multi_islets_2",
+  outputDirectory = "data/archr_projects/save_multi_islets_2",
   dropCells = TRUE,
   logFile = NULL,
-  threads = getArchRThreads(),
+  threads = parallel::detectCores() - 1,
   force =  TRUE
 )
 
 # save archr project ------------------------------------------------------
 saveArchRProject(ArchRProj = multi_islets_2,
-                 outputDirectory = here::here("archr_projects/save_multi_islets_2"),
+                 outputDirectory = here::here("data/archr_projects/save_multi_islets_2"),
+                 threads = parallel::detectCores() - 1,
                  load = FALSE)
 
 
