@@ -97,7 +97,7 @@ repeat {
     break
 }
 
-# save objects
+## save objects ----
 base::saveRDS(proc, here::here("data/dimensional_reduction/rna/jointly_proc_seurat_2.rds"))
 base::saveRDS(cpca, here::here("data/dimensional_reduction/rna/jointly_cpca_seurat_2.rds"))
 base::saveRDS(inputs, here::here("data/dimensional_reduction/rna/jointly_inputs_seurat_2.rds"))
@@ -133,7 +133,7 @@ p1 <- purrr::map(s_list, function(s_obj){
                                       raster = TRUE, 
                                       raster.dpi = c(800, 800)) +
     my_theme_void() +
-    ggplot2::theme(legend.position = "none",
+    ggplot2::theme(legend.position = "none", 
                    title = element_blank())
   return(output)
 })
@@ -179,23 +179,24 @@ global_ilisi <- purrr::map_dfr(seq_along(results), function(i) {
 openxlsx::write.xlsx(global_ilisi, here::here("data/export/ilisi_jointly.xlsx"))
 
 ## save seurat list object ----
-saveRDS(s_list, file = here::here("data/dimensional_reduction/rna/s_list.rds"))
+base::saveRDS(s_list, file = here::here("data/dimensional_reduction/rna/s_list.rds"))
 
 # closer look at iteration 5 ---------------------------------------------
 # extract seurat object of interest
 seurat_3 <- s_list[[5]]
-##!!!! you are here
+
 ## change these plots 
 p2 <- seurat_3 %>%
   Seurat::DimPlot(reduction = "umap",
                   split.by = "condition",
                   group.by = "orig.ident",
                   cols = sample_color,
-                  pt.size = 3, 
+                  pt.size = 5, 
                   raster = TRUE, 
                   raster.dpi = c(800, 800)) +
-  my_theme_void() +
-  ggplot2::theme(title = element_text())
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
 
 
@@ -203,58 +204,22 @@ p3 <- seurat_3 %>%
   Seurat::DimPlot(reduction = "umap",
                   split.by = "orig.ident",
                   group.by = "orig.ident",
-                  cols = sample_color) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off")
+                  cols = sample_color,
+                  pt.size = 5, 
+                  raster = TRUE, 
+                  raster.dpi = c(800, 800)) +
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
 # save plots
 ggplot2::ggsave(p2, filename = here::here("data/dimensional_reduction/rna/jointly_umap_itr_nr_5_split_by_condition.pdf"),
-                height = 6,
-                width = 15)
+                height = 6/3,
+                width = 6,
+                dpi = 500)
 ggplot2::ggsave(p3, filename = here::here("data/dimensional_reduction/rna/jointly_umap_itr_nr_5_split_by_sample.pdf"),
-                height = 4,
-                width = 18)
-
-# Perform pca on jointly embeddings ---------------------------------------
-# how does this affect the UMAP clustering?
-# perform pca on jointly embeddings
-jointly_emb <- seurat_3@reductions$jointly@cell.embeddings %>%
-  prcomp()
-
-# check that rownames are equal
-all.equal(rownames(jointly_emb$x), rownames(seurat_3@reductions$jointly@cell.embeddings))
-
-# add embedding to seurat object
-seurat_3[["jointly_pca"]] <- CreateDimReducObject(as.matrix(jointly_emb$x),
-                                                  assay = "RNA",
-                                                  key = "jointlypca_")
-
-
-# UMAP
-seurat_3 <- seurat_3 %>%
-  Seurat::RunUMAP(reduction = "jointly_pca",
-                  reduction.key = "UMAPjointlypca_",
-                  reduction.name = "umap.jointly.pca",
-                  dims = 1:15)
-
-# dimplot
-p6 <- seurat_3 %>% Seurat::DimPlot(reduction = "umap",
-                                   group.by = "condition",
-                                   cols = condition_color) +
-  ggtitle("UMAP - Jointly embedings") +
-  seurat_3 %>% Seurat::DimPlot(reduction = "umap.jointly.pca",
-                               group.by = "condition",
-                               cols = condition_color) +
-  ggtitle("UMAP - PCA Jointly embeddings") & ggprism::theme_prism(border = T,
-                                                                  base_fontface = "plain",
-                                                                  base_size = 12) &
-  ggplot2::coord_cartesian(clip = "off")
-
-
-
-p6
+                height = 6/6,
+                width = 6, dpi = 500)
 
 # Interpret W matrix ------------------------------------------------------
 # Interpret W matrix - for iteration nr 5
@@ -292,14 +257,14 @@ W.sum <- W.tmp
 modules <- list()
 for (i in 1:15) {
   modules[[length(modules) + 1]] <-
-    names(sort(W.sum[, i], decreasing = TRUE))[1:inflection::uik(y = sort(W.sum[, i], decreasing = TRUE),
+    base::names(sort(W.sum[, i], decreasing = TRUE))[1:inflection::uik(y = sort(W.sum[, i], decreasing = TRUE),
                                                                  x = seq(1, nrow(W.sum), 1))]
-  names(modules)[length(modules)] <-
+  base::names(modules)[base::length(modules)] <-
     paste("factor_", i, sep = "")
 }
 
-# Save modules
-saveRDS(modules, file = here::here("data/dimensional_reduction/rna/jointly_modules_itr_nr_5_seurat_2.rds"))
+## Save modules ----
+base::saveRDS(modules, file = here::here("data/dimensional_reduction/rna/jointly_modules_itr_nr_5_seurat_2.rds"))
 
 # Deep clustering for doublet identificaiton ------------------------------
 # Find clusters
@@ -312,19 +277,20 @@ seurat_3 <- seurat_3 %>%
 # plot clusteirng
 p4 <- seurat_3 %>% Seurat::DimPlot(reduction = "umap",
                                    group.by = "seurat_clusters",
-                                   label = TRUE) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(legend.position = "none")
-
+                                   label = FALSE,
+                                   pt.size = 3, 
+                                   raster = TRUE, 
+                                   raster.dpi = c(800, 800)) +
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
 # save cluster
 ggplot2::ggsave(p4,
                 filename = here::here("data/quality_control/rna/ALL_dimplot_clusters_used_for_doublet_identification.pdf"),
-                height = 9.18,
-                width = 9.18)
+                height = 6,
+                width = 6,
+                dpi = 500)
 
 
 # Polyhormone detection - marker genes ------------------------------------
@@ -355,37 +321,46 @@ avg.scaled[rownames(avg.scaled) %in% markers, ] %>%
   dplyr::select(all_of(db_cluster))
 
 # Plot doublets -----------------------------------------------------------
+seurat_3@meta.data <- seurat_3@meta.data %>% 
+  dplyr::mutate(multiplet = dplyr::case_when(RNA_snn_res.20 %in% db_cluster ~ "multiplet",
+                                             !RNA_snn_res.20 %in% db_cluster ~ "singlet"))
 p5 <- seurat_3 %>%
   Seurat::DimPlot(reduction = "umap",
-                  cells.highlight = seurat_3@meta.data %>%
-                    dplyr::filter(RNA_snn_res.20 %in% db_cluster) %>%
-                    rownames(),
-                  sizes.highlight = 0.5) +
-  ggplot2::scale_color_manual(labels = c("Singlet", "Doublet"), values = c("grey", "#A83708")) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off")
+                  group.by = "multiplet",
+                  pt.size = 3,
+                  cols = c("multiplet" = "#A83708",
+                           "singlet" = "grey"),
+                  order = TRUE,
+                  raster = TRUE, 
+                  raster.dpi = c(800, 800)) +
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
 ggplot2::ggsave(p5,
                 filename = here::here("data/quality_control/rna/ALL_dimplot_doublet_identification.pdf"),
-                height = 8,
-                width = 9.18)
+                height = 6,
+                width = 6,
+                dpi = 500)
 
 # Plot feature plot of expression of marker genes
 p6 <- seurat_3 %>%
-  Seurat::FeaturePlot(features = markers) &
-  ggplot2::scale_colour_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 11, name = "Spectral"))) &
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) &
-  ggplot2::coord_cartesian(clip = "off")
+  Seurat::FeaturePlot(features = markers,
+                      pt.size = 3, 
+                      raster = TRUE, 
+                      raster.dpi = c(800, 800), 
+                      cols = base::rev(RColorBrewer::brewer.pal(n = 11, name = "Spectral")),
+                      ncol = 4) +
+  patchwork::plot_layout(guides = "collect") &
+  my_theme_void(remove_strip_text = FALSE) &
+  ggplot2::guides(colour = ggplot2::guide_colourbar(barwidth = 0.5, barheight = 6))
 
 # save plot
 ggplot2::ggsave(p6,
                 filename = here::here("data/quality_control/rna/ALL_feature_plot_marker_genes_used_for_doublet_identification.pdf"),
-                height = 8,
-                width = 9.18)
+                height = 6/4,
+                width = 6,
+                dpi = 500)
 
 
 # Calculate module scores -------------------------------------------------
@@ -398,13 +373,15 @@ seurat_3 <- UCell::AddModuleScore_UCell(seurat_3, features = modules)
 seurat_3 %>%
   Seurat::FeaturePlot(
     reduction = "umap",
-    features =  names(modules) %>% stringi::stri_join("_UCell")
-  ) &
-  ggplot2::scale_colour_gradientn(colours = rev(RColorBrewer::brewer.pal(n = 11, name = "Spectral"))) &
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) &
-  ggplot2::coord_cartesian(clip = "off")
+    features =  base::names(modules) %>% stringi::stri_join("_UCell"),
+    pt.size = 3, 
+    raster = TRUE, 
+    raster.dpi = c(800, 800), 
+    cols = base::rev(RColorBrewer::brewer.pal(n = 11, name = "Spectral")),
+    ncol = 5) +
+  patchwork::plot_layout(guides = "collect") &
+  my_theme_void(remove_strip_text = FALSE) &
+  ggplot2::guides(colour = ggplot2::guide_colourbar(barwidth = 0.5, barheight = 6))
 
 # Find clusters with lower resolution -------------------------------------
 # Find clusters
@@ -413,16 +390,13 @@ seurat_3 <- seurat_3 %>%
                        algorithm = 1)
 
 seurat_3 %>% Seurat::DimPlot(reduction = "umap", group.by = "seurat_clusters", cols = cluster_color) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off")
+  my_theme_void(remove_strip_text = TRUE)
 
 
 # Plot modules scores in heatmap ------------------------------------------
 # extract module scores - and find median
 module_df <- seurat_3@meta.data %>%
-  as.data.frame() %>%
+  BiocGenerics::as.data.frame() %>%
   dplyr::select(starts_with("factor_"), seurat_clusters) %>%
   dplyr::group_by(seurat_clusters) %>%
   dplyr::summarise(across(starts_with("factor_"), median)) %>%
@@ -431,7 +405,7 @@ module_df <- seurat_3@meta.data %>%
   dplyr::rename_all(~stringr::str_remove(., "u Cell"))
 
 anno_row <- module_df %>%
-  dplyr::mutate(seurat_clusters = rownames(module_df)) %>%
+  dplyr::mutate(seurat_clusters = BiocGenerics::rownames(module_df)) %>%
   dplyr::select(seurat_clusters)
 
 module_df %>%
@@ -448,7 +422,7 @@ saveRDS(seurat_3, here::here("data/seurat_objects/seurat_3.rds"))
 # Remove doublets ---------------------------------------------------------
 db_remove <- seurat_3@meta.data %>%
   dplyr::filter(RNA_snn_res.20 %in% db_cluster) %>%
-  rownames()
+  BiocGenerics::rownames()
 
 # remove doublet cells
 seurat_4 <- base::subset(seurat_3,
@@ -461,64 +435,56 @@ seurat_4 <- seurat_4 %>% Seurat::NormalizeData()
 # redo umap on jointly embeddings
 seurat_4 <- seurat_4 %>%
   Seurat::RunUMAP(reduction = "jointly",
-                  dims = 1:15,
-                  seed.use = 42)
-
-# redo umap on jointly pca embeddings
-seurat_4 <- seurat_4 %>%
-  Seurat::RunUMAP(reduction = "jointly_pca",
-                  reduction.key = "UMAPjointlypca_",
-                  reduction.name = "umap.jointly.pca",
-                  dims = 1:15,
-                  seed.use = 42)
-
+                  dims = 1:15)
 
 # Dimplots ----------------------------------------------------------------
 
 p7 <- seurat_4 %>%
   Seurat::DimPlot(reduction = "umap",
                   group.by = "orig.ident",
-                  cols = sample_color) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(title = element_blank(),
-                 legend.position = "none")
+                  cols = sample_color,
+                  pt.size = 3, 
+                  raster = TRUE, 
+                  raster.dpi = c(800, 800)) +
+  my_theme_void(remove_strip_text = TRUE)
 
 
 p8 <- seurat_4 %>%
   Seurat::DimPlot(reduction = "umap",
                   split.by = "condition",
                   group.by = "orig.ident",
-                  cols = sample_color) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off")
+                  cols = sample_color,
+                  pt.size = 3, 
+                  raster = TRUE, 
+                  raster.dpi = c(800, 800)) +
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(legend.position = "none",
+                 title = element_blank())
 
 
 p9 <- seurat_4 %>%
   Seurat::DimPlot(reduction = "umap",
                   split.by = "orig.ident",
                   group.by = "orig.ident",
-                  cols = sample_color) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off")
+                  cols = sample_color,
+                  pt.size = 3, 
+                  raster = TRUE, 
+                  raster.dpi = c(800, 800)) +
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(legend.position = "none",
+                 title = element_blank())
 
 # save plots
 ggplot2::ggsave(p7, filename = here::here("data/dimensional_reduction/rna/seurat4_dimplot.pdf"),
-                height = 9.18,
-                width = 9.18)
-ggplot2::ggsave(p8, filename = here::here("data/dimensional_reduction/rna/seurat4_dimplot_condition_split_sample_color.pdf"),
                 height = 6,
-                width = 15)
+                width = 6)
+ggplot2::ggsave(p8, filename = here::here("data/dimensional_reduction/rna/seurat4_dimplot_condition_split_sample_color.pdf"),
+                height = 6/3,
+                width = 6)
 ggplot2::ggsave(p9, filename = here::here("data/dimensional_reduction/rna/seurat4_dimplot_sample_split_sample_color.pdf"),
-                height = 4,
-                width = 18)
+                height = 6/7,
+                width = 6)
 
 # save
-saveRDS(seurat_4, file = here::here("data/seurat_objects/seurat_4.rds"))
-saveRDS(db_remove, file = here::here("data/quality_control/rna/ALL_polyhormone_cells_remove.rds"))
+base::saveRDS(seurat_4, file = here::here("data/seurat_objects/seurat_4.rds"))
+base::saveRDS(db_remove, file = here::here("data/quality_control/rna/ALL_polyhormone_cells_remove.rds"))
