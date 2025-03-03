@@ -5,3 +5,7 @@
 ArchRLogs
 QualityControl
 data
+AF_ATAC_integration_tiles.Rout
+AH_ATAC_find_peaks.Rout
+AI_ATAC_integration_peaks.Rout
+macs2_env
