@@ -9,10 +9,10 @@ ArchR::addArchRGenome("mm10")
 
 create_directories(c(here::here("data/dimensional_reduction"), 
                      here::here("data/dimensional_reduction/atac")))
-# Load --------------------------------------------------------------------
+# # Load --------------------------------------------------------------------
 multi_islets_3 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_2/"))
 
-saveArchRProject(ArchR::ArchRProj = multi_islets_3,
+ArchR::saveArchRProject(ArchRProj = multi_islets_3,
                  outputDirectory = here::here("data/archr_projects/save_multi_islets_3"),
                  threads = parallel::detectCores() - 1,
                  load = FALSE)
@@ -52,8 +52,9 @@ ArchR::saveArchRProject(ArchRProj = multi_islets_3,
                  threads = parallel::detectCores() - 1,
                  load = FALSE)
 
-
 # Get variable features ---------------------------------------------------
+multi_islets_3 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_3/"))
+
 # Load variable features used in LSI, make each fature the syntax "chr-start-end" and convert to vector
 variable_features <- multi_islets_3@reducedDims$IterativeLSI@listData[["LSIFeatures"]] %>%
   BiocGenerics::as.data.frame() %>%
@@ -85,7 +86,7 @@ for (i in sample_levels) {
 
 # Transform tile matrix into dataframe and also create a feature column with the syntax "chr-start-end"
 # Extract matrix
-tiles_matrix <- purrr::map(tile_list, function(.x){
+tiles_matrix <- purrr::map(tiles_list, function(.x){
   # extract data
   matrix <- SummarizedExperiment::assays(.x)$TileMatrix
   # row names
@@ -128,4 +129,4 @@ liger_tiles <- liger_tiles %>%
   rliger::quantile_norm(resolution = 0.4,
                         small.clust.thresh = 20)
 # save liger object
-saveRDS(liger_tiles, file = here::here("data/dimensional_reduction/atac/liger_integration_5000_bp_tiles.rds"))
+base::saveRDS(liger_tiles, file = here::here("data/dimensional_reduction/atac/liger_integration_5000_bp_tiles.rds"))

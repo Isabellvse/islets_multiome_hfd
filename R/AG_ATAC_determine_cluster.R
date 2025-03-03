@@ -12,7 +12,7 @@ create_directories(c(here::here("data/dimensional_reduction"),
                      here::here("data/dimensional_reduction/atac")))
 
 # Load --------------------------------------------------------------------
-multi_islets_3 <- ArchR::loadArchRProject(path = here::here("archr_projects/save_multi_islets_3/"))
+multi_islets_3 <- ArchR::loadArchRProject(path = here::here("data/archr_projects/save_multi_islets_3/"))
 liger_tiles <- base::readRDS(here::here("data/dimensional_reduction/atac/liger_integration_5000_bp_tiles.rds"))
 seurat_4 <- base::readRDS(here::here("data/seurat_objects/seurat_4.rds"))
 
@@ -57,7 +57,6 @@ embeddings <- S4Vectors::DataFrame(liger_tiles@tsne.coords) %>%
 embeddings <- embeddings[base::match(BiocGenerics::rownames(multi_islets_3@cellColData), embeddings$barcode), ]
 
 # add barcodes back as rownmaes
-
 BiocGenerics::rownames(embeddings) <- NULL
 embeddings <- embeddings %>%
   tibble::column_to_rownames("barcode")
@@ -70,7 +69,7 @@ BiocGenerics::colnames(embeddings) <- c("ligertiles#UMAP_1",
 base::all.equal(BiocGenerics::rownames(embeddings), BiocGenerics::rownames(multi_islets_3@cellColData))
 
 # Add UMAP embeddings to archr
-multi_islets_3@embeddings$liger_tiles_umap <- SimpleList(df = embeddings, params = list())
+multi_islets_3@embeddings$liger_tiles_umap <- S4Vectors::SimpleList(df = embeddings, params = list())
 
 # Add clusters - join the two dataframes together to ensure that we are adding clusters to the right barcode.
 # Extract liger clusters
@@ -109,17 +108,18 @@ tile_sample_plot <- multi_islets_3@cellColData %>%
                       y = UMAP2,
                       color = Sample))+
   ggplot2::scale_color_manual(values = sample_color) +
-  ggplot2::geom_point(size = 0.1)+
+  ggrastr::geom_point_rast(size = 0.1, raster.dpi = 500)+
   ggplot2::labs(x = "UMAP 1 (Tiles)",
                 y = "UMAP 2 (Tiles)") +
   ggplot2::guides(color=guide_legend(ncol = 3,
                                      override.aes = list(size = 2))) +
   my_theme_void() +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(legend.title = element_blank(),
-                 legend.position = c(.5, .8),
-                 legend.justification = c("left", "bottom"),
-                 legend.direction = "horizontal")
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
+ggplot2::ggsave(tile_sample_plot, filename = here::here("data/dimensional_reduction/atac/liger_tiles_integration_umap.pdf"),
+                height = 6,
+                width = 6,
+                dpi = 500)
 
 # Plot UMAP with ggplot - color by sample - split by sample
 tile_sample_split_plot <- multi_islets_3@cellColData %>%
@@ -135,13 +135,18 @@ tile_sample_split_plot <- multi_islets_3@cellColData %>%
                       y = UMAP2,
                       color = Sample))+
   ggplot2::scale_color_manual(values = sample_color) +
-  ggplot2::geom_point(size = 0.1)+
+  ggrastr::geom_point_rast(size = 1, raster.dpi = 500, scale = 0.2)+
   ggplot2::labs(x = "UMAP 1 (Tiles)",
                 y = "UMAP 2 (Tiles)") +
   ggplot2::facet_wrap(~ Sample, ncol = 7) +
-  my_theme_void() +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(legend.position = "none")
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
+
+ggplot2::ggsave(tile_sample_split_plot, filename = here::here("data/dimensional_reduction/atac/tile_sample_split_umap.pdf"),
+                height = 6/7,
+                width = 6,
+                dpi = 500)
 
 # Plot UMAP with ggplot - color by sample - split by diet
 tile_diet_split_plot <- multi_islets_3@cellColData %>%
@@ -159,18 +164,21 @@ tile_diet_split_plot <- multi_islets_3@cellColData %>%
                       y = UMAP2,
                       color = Sample))+
   ggplot2::scale_color_manual(values = sample_color) +
-  ggplot2::geom_point(size = 0.1)+
+  ggrastr::geom_point_rast(size = 2, raster.dpi = 500, scale = 0.2) +
   ggplot2::labs(x = "UMAP 1 (Tiles)",
                 y = "UMAP 2 (Tiles)") +
   ggplot2::facet_wrap(~ diet, ncol = 3) +
   ggplot2::guides(color=guide_legend(ncol = 3,
                                      override.aes = list(size = 2))) +
-  my_theme_void() +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(legend.title = element_blank(),
-                 legend.position = c(.7, .7),
-                 legend.justification = c("left", "bottom"),
-                 legend.direction = "horizontal")
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
+
+ggplot2::ggsave(tile_diet_split_plot, filename = here::here("data/dimensional_reduction/atac/tile_diet_split_umap.pdf"),
+                height = 6/3,
+                width = 6,
+                dpi = 500)
+
 
 # Plot UMAP with ggplot - color by liger cluster
 tile_cluster_plot <- multi_islets_3@cellColData %>%
@@ -187,111 +195,92 @@ tile_cluster_plot <- multi_islets_3@cellColData %>%
                       y = UMAP2,
                       color = liger_clusters_res_2))+
   ggplot2::scale_color_manual(values = cluster_color) +
-  ggplot2::geom_point(size = 0.1)+
+  ggrastr::geom_point_rast(size = 0.1, raster.dpi = 500)+
   ggplot2::labs(x = "UMAP 1 (Tiles)",
                 y = "UMAP 2 (Tiles)") +
   ggplot2::guides(color=guide_legend(ncol = 4,
                                      override.aes = list(size = 2))) +
-  my_theme_void() +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(legend.title = element_blank(),
-                 legend.position = c(.5, .7),
-                 legend.justification = c("left", "bottom"),
-                 legend.direction = "horizontal")
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
-# create list of plots
-plot_list <- base::list(tile_sample_plot, tile_cluster_plot)
-
-
-# Save plots --------------------------------------------------------------
-pdf(file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_umap.pdf"),
-    height = 6,
-    width = 6)
-plot_list
-dev.off()
-
-pdf(file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_umap_diet.pdf"),
-    height = 2,
-    width = 6)
-tile_diet_split_plot
-dev.off()
-
-pdf(file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_umap_sample.pdf"),
-    height = 0.85,
-    width = 6)
-tile_sample_split_plot
-dev.off()
-
+ggplot2::ggsave(tile_cluster_plot, filename = here::here("data/dimensional_reduction/atac/tile_cluster_plot _umap.pdf"),
+                height = 6,
+                width = 6,
+                dpi = 500)
 
 # Add Gene score ----------------------------------------------------------
 # Add gene score matrix, default parameters expect for tile size is 5000
 multi_islets_3 <-
   ArchR::addGeneScoreMatrix(
     input = multi_islets_3,
-    force = TRUE,
+    force = TRUE, 
+    threads = parallel::detectCores() - 1,
     logFile = createLogFile("addGeneScoreMatrix")
   )
 
 # Impute (smooth) gene scores with MAGIC
-multi_islets_3 <- ArchR::addImputeWeights(multi_islets_3)
+multi_islets_3 <- ArchR::addImputeWeights(multi_islets_3, threads = parallel::detectCores() - 1)
 
 # Gene score plots --------------------------------------------------------
 # Plot gene scores
 marker_plot <- ArchR::plotEmbedding(
   ArchRProj = multi_islets_3,
+  threads = parallel::detectCores() - 1,
   colorBy = "GeneScoreMatrix",
   name = purrr::as_vector(markers_short),
   embedding = "liger_tiles_umap",
-  imputeWeights = getImputeWeights(multi_islets_3)
+  imputeWeights = ArchR::getImputeWeights(multi_islets_3)
 )
 
 # Add new theme and title
 marker_plot <- BiocGenerics::Map(archr_dim_gene_score,
                                  plot = marker_plot,
-                                 title = names(marker_plot))
+                                 title = base::names(marker_plot))
 # Save plots --------------------------------------------------------------
 pdf(file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_gene_score_markers.pdf"),
-    height = 9.18,
-    width = 9.18)
+    height = 6,
+    width = 6)
 marker_plot
 dev.off()
 
 # Gene expression + Gene score in seurat ----------------------------------
 ## Add liger clusters to seurat object
 cellcoldata <- cellcoldata %>%
-  mutate(barcode = cellcoldata$barcode %>% atac_to_rna_syntax())
+  dplyr::mutate(barcode = cellcoldata$barcode %>% atac_to_rna_syntax())
 
 # Add clusters  to meta data
 seurat_4@meta.data <- seurat_4@meta.data %>%
   tibble::rownames_to_column("barcode") %>%
-  full_join(y = cellcoldata,
+  dplyr::full_join(y = cellcoldata,
             by = "barcode") %>%
   tibble::column_to_rownames("barcode")
 
 # change liger clusters to numeric
-seurat_4@meta.data$liger_clusters_res_2 <- as.numeric(seurat_4@meta.data$liger_clusters_res_2)
+seurat_4@meta.data$liger_clusters_res_2 <- base::as.numeric(seurat_4@meta.data$liger_clusters_res_2)
 
 ## Add gene scores to seurat object
 # Extract gene score
 gene_score <- ArchR::getMatrixFromProject(multi_islets_3, useMatrix='GeneScoreMatrix')
 
 # Gene score matrix
-gene_score_matrix <- assays(gene_score)$GeneScoreMatrix
+gene_score_matrix <- SummarizedExperiment::assays(gene_score)$GeneScoreMatrix
 
 # colnames
-colnames(gene_score_matrix) <- colnames(gene_score_matrix) %>%
+colnames(gene_score_matrix) <- BiocGenerics::colnames(gene_score_matrix) %>%
   atac_to_rna_syntax()
 
 # row data
 rowdata <- gene_score %>%
   SummarizedExperiment::rowData()
-rownames(gene_score_matrix) <- rowdata$name
+
+BiocGenerics::rownames(gene_score_matrix) <- rowdata$name
 
 # Add gene score to new assay
-seurat_4[["tiles"]] <- CreateAssayObject(counts = gene_score_matrix)
+seurat_4[["tiles"]] <- Seurat::CreateAssayObject(counts = gene_score_matrix)
 
 # Normalize gene scores
-DefaultAssay(seurat_4) <- "tiles"
+Seurat::DefaultAssay(seurat_4) <- "tiles"
 seurat_4 <- seurat_4 %>%
   Seurat::NormalizeData()
 
@@ -303,17 +292,14 @@ gene_exp <-  Seurat::VlnPlot(seurat_4,
                              flip = TRUE,
                              fill.by = "ident",
                              assay = "RNA",
-                             group.by = "liger_clusters_res_2",
+                             group.by = "liger_clusters_res_2", 
                              cols = cluster_color) +
   ggplot2::labs(x = "Clusters",
                 y = "ln(NormCounts +1)",
                 title = "Gene Expression") +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::theme(legend.position = "none") &
-  ggplot2::geom_boxplot(width = 0.3,
-                        outlier.shape = NA)
+  my_theme() +
+  ggplot2::theme(title = element_blank(), 
+                 legend.position = "none")
 
 # Gene score
 gene_sc <- Seurat::VlnPlot(seurat_4,
@@ -327,20 +313,16 @@ gene_sc <- Seurat::VlnPlot(seurat_4,
   ggplot2::labs(x = "Clusters",
                 y = "ln(NormCounts +1)",
                 title = "Gene Score") +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::theme(legend.position = "none") &
-  ggplot2::geom_boxplot(width = 0.3,
-                        outlier.shape = NA)
+  my_theme() +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
-# save plot
-pdf(height = 20,
-    width = 15,
-    file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_tiles_gene_score_exp_vln.pdf"))
-gene_sc + gene_exp
-dev.off()
 
+gene_exp_sc <- gene_sc + gene_exp
+ggplot2::ggsave(gene_exp_sc, filename=here::here("data/dimensional_reduction/atac/liger_tiles_integration_tiles_gene_score_exp_vln.pdf"),
+       width = 6,
+       height = 8, 
+       dpi = 500)
 
 # Add cluster identity ----------------------------------------------------
 cellcoldata_clu <- multi_islets_3@cellColData %>%
@@ -359,27 +341,28 @@ cellcoldata_clu <- multi_islets_3@cellColData %>%
                                                 liger_clusters_res_2 == 10 ~ "Beta",
                                                 liger_clusters_res_2 == 11 ~ "Beta",
                                                 liger_clusters_res_2 == 12 ~ "Beta",
-                                                liger_clusters_res_2 == 13 ~ "Delta",
+                                                liger_clusters_res_2 == 13 ~ "Beta",
                                                 liger_clusters_res_2 == 14 ~ "Beta",
-                                                liger_clusters_res_2 == 15 ~ "Beta",
-                                                liger_clusters_res_2 == 16 ~ "Alpha",
-                                                liger_clusters_res_2 == 17 ~ "Beta",
+                                                liger_clusters_res_2 == 15 ~ "Delta",
+                                                liger_clusters_res_2 == 16 ~ "Beta",
+                                                liger_clusters_res_2 == 17 ~ "Alpha",
                                                 liger_clusters_res_2 == 18 ~ "Beta",
                                                 liger_clusters_res_2 == 19 ~ "Beta",
-                                                liger_clusters_res_2 == 20 ~ "Alpha",
-                                                liger_clusters_res_2 == 21 ~ "Beta",
-                                                liger_clusters_res_2 == 22 ~ "Endothelial",
-                                                liger_clusters_res_2 == 23 ~ "Beta",
-                                                liger_clusters_res_2 == 24 ~ "Gamma",
+                                                liger_clusters_res_2 == 20 ~ "Beta",
+                                                liger_clusters_res_2 == 21 ~ "Alpha",
+                                                liger_clusters_res_2 == 22 ~ "Gamma",
+                                                liger_clusters_res_2 == 23 ~ "Endothelial",
+                                                liger_clusters_res_2 == 24 ~ "Beta",
                                                 liger_clusters_res_2 == 25 ~ "Delta",
-                                                liger_clusters_res_2 == 26 ~ "Stellate",
-                                                liger_clusters_res_2 == 27 ~ "Immune",
-                                                liger_clusters_res_2 == 28 ~ "Acinar",
-                                                liger_clusters_res_2 == 29 ~ "Stellate",
-                                                liger_clusters_res_2 == 30 ~ "Endothelial",
-                                                liger_clusters_res_2 == 31 ~ "Alpha",
-                                                liger_clusters_res_2 == 32 ~ "Stellate",
-                                                liger_clusters_res_2 == 33 ~ "Immune"
+                                                liger_clusters_res_2 == 26 ~ "Endothelial",
+                                                liger_clusters_res_2 == 27 ~ "Endothelial",
+                                                liger_clusters_res_2 == 28 ~ "Immune",
+                                                liger_clusters_res_2 == 29 ~ "Acinar",
+                                                liger_clusters_res_2 == 30 ~ "Beta",
+                                                liger_clusters_res_2 == 31 ~ "Stellate",
+                                                liger_clusters_res_2 == 32 ~ "Beta",
+                                                liger_clusters_res_2 == 33 ~ "Beta",
+                                                liger_clusters_res_2 == 34 ~ "Immune"
   ))
 
 # add new annotation to archr project using the cellcoldata dataframe
@@ -403,41 +386,31 @@ tile_cluster_anno_plot <- multi_islets_3@cellColData %>%
                       y = UMAP2,
                       color = cluster_anno))+
   ggplot2::scale_color_manual(values = cluster_anno) +
-  ggplot2::geom_point(size = 0.1)+
+  ggrastr::geom_point_rast(size = 0.1, raster.dpi = 500)+
   ggplot2::labs(x = "UMAP 1 (Tiles)",
                 y = "UMAP 2 (Tiles)") +
-  ggplot2::guides(color=guide_legend(ncol = 4,
-                                     override.aes = list(size = 2))) +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::theme(legend.title = element_blank(),
-                 legend.position = c(.5, .7),
-                 legend.justification = c("left", "bottom"),
-                 legend.direction = "horizontal")
+  my_theme_void(remove_strip_text = FALSE) +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "right")
 
-# save plot
-pdf(file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_umap_cluster_anno.pdf"),
-    height = 9.18,
-    width = 9.18)
-tile_cluster_anno_plot
-dev.off()
-
+ggplot2::ggsave(tile_cluster_anno_plot, filename = here::here("data/dimensional_reduction/atac/liger_tiles_integration_umap_cluster_anno.pdf"),
+                height = 6,
+                width = 6,
+                dpi = 500)
 
 # Add annotation to seurat ------------------------------------------------
 ## Add liger clusters to seurat object
 cellcoldata_clu <- cellcoldata_clu %>%
-  mutate(barcode = cellcoldata_clu$barcode %>% atac_to_rna_syntax()) %>%
+  dplyr::mutate(barcode = cellcoldata_clu$barcode %>% atac_to_rna_syntax()) %>%
   dplyr::select(barcode, cluster_anno)
 
 # Add clusters  to meta data
 seurat_4@meta.data <- seurat_4@meta.data %>%
   tibble::rownames_to_column("barcode") %>%
-  left_join(y = cellcoldata_clu,
+  dplyr::left_join(y = cellcoldata_clu,
             by = "barcode") %>%
   tibble::column_to_rownames("barcode") %>%
-  dplyr::mutate(cluster_anno = factor(cluster_anno, levels = c("Beta",
+  dplyr::mutate(cluster_anno = base::factor(cluster_anno, levels = c("Beta",
                                                                "Alpha",
                                                                "Delta",
                                                                "Gamma",
@@ -459,13 +432,9 @@ gene_exp <-  Seurat::VlnPlot(seurat_4,
   ggplot2::labs(x = "Clusters",
                 y = "ln(NormCounts +1)",
                 title = "Gene Expression") +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::theme(legend.position = "none")  &
-  ggplot2::geom_boxplot(width = 0.3,
-                        outlier.shape = NA)
-
+  my_theme() +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 
 # Gene score
 gene_sc <- Seurat::VlnPlot(seurat_4,
@@ -479,13 +448,9 @@ gene_sc <- Seurat::VlnPlot(seurat_4,
   ggplot2::labs(x = "Clusters",
                 y = "ln(NormCounts +1)",
                 title = "Gene Score") +
-  ggprism::theme_prism(border = T,
-                       base_fontface = "plain",
-                       base_size = 12) +
-  ggplot2::theme(legend.position = "none")  &
-  ggplot2::geom_boxplot(width = 0.3,
-                        outlier.shape = NA)
-
+  my_theme() +
+  ggplot2::theme(title = element_blank(),
+                 legend.position = "none")
 # save plot
 pdf(height = 20,
     width = 9.18,
@@ -496,13 +461,14 @@ dev.off()
 
 # save --------------------------------------------------------------------
 # save liger tiles
-saveRDS(liger_tiles, file = here::here("data/dimensional_reduction/atac/liger_integration_5000_bp_tiles.rds"))
+base::saveRDS(liger_tiles, file = here::here("data/dimensional_reduction/atac/liger_integration_5000_bp_tiles.rds"))
 
 # Save Archr project
-saveArchRProject(ArchRProj = multi_islets_3,
-                 outputDirectory = here::here("archr_projects/save_multi_islets_3"),
+ArchR::saveArchRProject(ArchRProj = multi_islets_3,
+                 outputDirectory = here::here("data/archr_projects/save_multi_islets_3"),
+                 threads = parallel::detectCores() - 1,
                  load = FALSE)
 
 # save seurat obj
-saveRDS(seurat_4, file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_seurat_4_rna.rds"))
+base::saveRDS(seurat_4, file = here::here("data/dimensional_reduction/atac/liger_tiles_integration_seurat_4_rna.rds"))
 

@@ -1,5 +1,5 @@
 
-# Sample levels -----------------------------------------------------------
+# Levels ------------------------------------------------------------------
 
 sample_levels <- c(
   "LFD_R1",
@@ -11,7 +11,13 @@ sample_levels <- c(
   "HFD_3_R2"
 )
 
+
 condition_levels <- c("LFD", "HFD_1", "HFD_3")
+
+manual_anno_levels = c("Beta", "Alpha", "Delta", "Gamma", "Acinar",
+                       "Endothelial", "Stellate", "Immune")
+# Colors ------------------------------------------------------------------
+
 
 sample_color <- c(  "LFD_R1" = "#004B7A",
                     "LFD_R2" = "#0484d4",
@@ -74,6 +80,21 @@ cluster_color <- c(
   "44" = "#2e8b57",
   "45" = "#ffa500")
 
+member_color <- c("1" = "#A83708",
+                  "2" = "#004B7A",
+                  "3" = "#2e8b57",
+                  "4" = "#F8AD4B",
+                  "5" = "#FADEB8")
+
+cluster_anno <- c("Beta" = "#A83708",
+                  "Alpha" = "#2e8b57",
+                  "Delta" = "#004B7A",
+                  "Gamma" = "#F8AD4B",
+                  "Acinar" = "#1e90ff",
+                  "Stellate" = "#ff1493",
+                  "Endothelial" = "#ba55d3",
+                  "Immune" = "#00ced1")
+# Marker genes ------------------------------------------------------------
 # list of markers short
 markers_short <- list(
   "Beta" = c("Ins1", "Ins2", "Slc2a2"),
@@ -84,3 +105,17 @@ markers_short <- list(
   "Endothelial" = c("Plvap", "Flt1", "Esm1"),
   "P_stellate" = c("Rgs5", "Col1a2", "Col6a1"),
   "Immune" = c("Cd74", "Cd83", "Cd53"))
+
+
+markers_short_tn <- list(
+  "Beta" = c("Ins2"),
+  "Alpha" = c("Gcg"),
+  "Delta" = c("Sst"),
+  "Gamma" = c("Ppy"),
+  "Cycling" = c("Top2a"),
+  "Acinar" = c("Prss2"),
+  "Endothelial" = c("Plvap"),
+  "Q_stellate" = c("Rgs5"),
+  "A_stellate" = c("Col1a1"),
+  "Immune" = c("Cd74"),
+  "Ductal" = c("Krt19"))
