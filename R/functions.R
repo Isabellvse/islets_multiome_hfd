@@ -101,10 +101,7 @@ process_doublets <- function(s_obj, sample_name, df_freq) {
 
 my_theme <- function() {
   ggplot2::theme_classic(base_size = 7) +
-    ggplot2::theme(
-      panel.grid.major = ggplot2::element_line(color = "grey85"),
-      panel.grid.minor = ggplot2::element_line(color = "grey95")
-    )
+    ggplot2::theme(strip.background = element_blank())
 }
 
 my_theme_void <- function(remove_strip_text = TRUE) {
@@ -537,3 +534,191 @@ mouse2human_symbol <- function(gene) {
   return(human_symbols)
 }
 
+human2mouse_symbol <- function(gene) {
+  # Step 1: Convert mouse gene symbols to mouse Entrez IDs
+  humanseg <- AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, gene, "ENTREZID", "SYMBOL")
+  
+  # Step 2: Map mouse Entrez IDs to human orthologs
+  mapped <- AnnotationDbi::select(Orthology.eg.db::Orthology.eg.db, keys=humanseg, columns="Mus_musculus", keytype= "Homo_sapiens")
+  
+  # Step 3: Convert human ortholog Entrez IDs to human Ensembl IDs
+  mouse_symbol <- AnnotationDbi::select(org.Mm.eg.db::org.Mm.eg.db, as.character(mapped$Mus_musculus), "SYMBOL", "ENTREZID")
+  
+  # Step 4: Return human Ensembl IDs
+  mouse_symbols <- mouse_symbol$SYMBOL[!is.na(mouse_symbol$SYMBOL)]
+  
+  return(mouse_symbols)
+}
+
+mouse2human_ensembl <- function(gene) {
+  # Step 1: Convert mouse gene symbols to mouse Entrez IDs
+  mouseseg <- AnnotationDbi::mapIds(org.Mm.eg.db::org.Mm.eg.db, gene, "ENTREZID", "SYMBOL")
+  
+  # Step 2: Map mouse Entrez IDs to human orthologs
+  mapped <- AnnotationDbi::select(Orthology.eg.db::Orthology.eg.db, keys=mouseseg, columns="Homo_sapiens", keytype="Mus_musculus")
+  
+  # Step 3: Convert human ortholog Entrez IDs to human Ensembl IDs
+  human_symbol <- AnnotationDbi::select(org.Hs.eg.db::org.Hs.eg.db, as.character(mapped$Homo_sapiens), "ENSEMBL", "ENTREZID")
+  
+  # Step 4: Return human Ensembl IDs
+  human_symbols <- human_symbol$ENSEMBL[!is.na(human_symbol$ENSEMBL)]
+  
+  return(human_symbols)
+}
+
+#' function to generate pseubulk counts (similar to the one used by scenic+)
+#'
+#' @param counts_gene a matrix with gene counts rows should be barcodes and columns genes
+#' @param auc_region a matrix with region auc scores rows should be barcodes
+#' @param auc_gene a matrix with gene auc scores rows should be barcodes
+#' @param z_scores a matrix with motif deviations rows should be barcodes
+#' @param ucell a matrix with ucell scores rows should be barcodes
+#' @param meta seurat meta data dataframe
+#' @param variable variable to create pseudobulks from e.g. "condition"
+#' @param seed a number
+#' @param nr_cells number of cells used to generate pseudobulk counts e.g. 10
+#' @param nr_pseudobulks number of pseudobulk counts to generate e.g. 100
+#'
+#' @return a list of pseudobulk counts for each matrix
+generate_pseudobulks <- function(counts_gene, auc_region, auc_gene, z_scores, meta, variable, seed = 555, nr_cells = 10, nr_pseudobulks = 100){
+  
+  # get counts - rows should be barcodes and columns genes
+  # these are normalized counts - so we get normalized and aggregated data like in the scenicplus function
+  # though our data is normalized with a scaling factor of 10*4 and not 10*6
+  dgem <- counts_gene
+  
+  # meta data
+  cell_data <- meta
+  
+  # Identify unique categories of cells based on the provided variable.
+  categories <- unique(cell_data[, variable])
+  
+  # create lists to generate pseudobulk counts for each matrix
+  z_scores_agg_list <- list()
+  auc_gene_agg_list <- list()
+  auc_region_agg_list <- list()
+  dgem_agg_list <- list()
+  cell_names <- list()
+  
+  
+  # For each category of cells, it samples a specified number of cells (nr_cells) for a specified number of times (nr_pseudobulks),
+  
+  for (category in categories) {
+    cells <- rownames(cell_data[cell_data[, variable] == category, ])
+    for (x in 1:nr_pseudobulks) {
+      set.seed(x)
+      
+      
+      sample_cells <- base::sample(cells, nr_cells)
+      
+      # calculates the column means of the expression data for the sampled cells, and stores these means in lists.
+      sub_z_scores <- base::colMeans(z_scores[sample_cells, ])
+      sub_auc_gene <- base::colMeans(auc_gene[sample_cells, ])
+      sub_auc_region <- base::colMeans(auc_region[sample_cells, ])
+      sub_dgem <- base::colMeans(dgem[sample_cells, ])
+      
+      z_scores_agg_list <- c(z_scores_agg_list, list(sub_z_scores))
+      auc_gene_agg_list <- c(auc_gene_agg_list, list(sub_auc_gene))
+      auc_region_agg_list <- c(auc_region_agg_list, list(sub_auc_region))
+      dgem_agg_list <- c(dgem_agg_list, list(sub_dgem))
+      cell_names <- c(cell_names, paste(category, x, sep = "_"))
+    }
+  }
+  
+  # combine lists of means into data frames, with columns representing pseudobulks and rows representing genes.
+  z_scores_agg <- do.call(cbind, z_scores_agg_list)
+  auc_gene_agg <- do.call(cbind, auc_gene_agg_list)
+  auc_region_agg <- do.call(cbind, auc_region_agg_list)
+  dgem_agg <- do.call(cbind, dgem_agg_list)
+  
+  # add colnames
+  colnames(z_scores_agg) <- cell_names
+  colnames(auc_gene_agg) <- cell_names
+  colnames(auc_region_agg) <- cell_names
+  colnames(dgem_agg) <- cell_names
+  
+  output <- list("z_scores_agg" = z_scores_agg,
+                 "auc_gene_agg" = auc_gene_agg,
+                 "auc_region_agg" = auc_region_agg,
+                 "rna_counts_agg" = dgem_agg)
+  
+  return(output)
+}
+
+gse_plot <- function (x, geneSetID, correlation_vector = NULL, by = "all", title = "",
+                      color = 'black', color.line = "orange",
+                      color.vline = "red", ...) {
+  by <- match.arg(by, c("runningScore", "preranked", "all"))
+  gsdata <- enrichplot:::gsInfo(x, geneSetID)
+  
+  # Ensure correlation_vector is provided if 'by' is 'preranked' or 'all'
+  if (by == "preranked" || by == "all") {
+    if (is.null(correlation_vector)) {
+      stop("correlation_vector must be provided when 'by' is 'preranked' or 'all'.")
+    }
+    
+    # Match the names of the correlation_vector with the gene list in gsdata
+    gsdata$correlation <- correlation_vector[gsdata$gene]
+    # Ensure that correlation values are aligned with the gene list
+    gsdata$correlation[is.na(gsdata$correlation)] <- 0
+  }
+  
+  # Create base ggplot object
+  p <- ggplot2::ggplot(gsdata, aes(x = x)) +
+    ggprism::theme_prism(border = T,
+                         base_fontface = "plain",
+                         base_size = 12) +
+    ggplot2::coord_cartesian(clip = "off") +
+    ggplot2::xlab("Position in the Ranked List of Genes")
+  
+  # Running Score Plot
+  if (by == "runningScore" || by == "all") {
+    p.res <- p + ggplot2::geom_linerange(aes(ymin = ymin, ymax = ymax), color = color)
+    p.res <- p.res + ggplot2::geom_line(aes(y = runningScore), color = color.line, size = 1)
+    enrichmentScore <- x@result[geneSetID, "enrichmentScore"]
+    es.df <- data.frame(es = which.min(abs(gsdata$runningScore - enrichmentScore)))
+    p.res <- p.res + ggplot2::geom_vline(data = es.df, aes(xintercept = es), colour = color.vline, linetype = "dashed")
+    p.res <- p.res + ggplot2::ylab("Running Enrichment Score")
+    p.res <- p.res + ggplot2::geom_hline(yintercept = 0)
+  }
+  
+  # Preranked Plot
+  if (by == "preranked" || by == "all") {
+    df2 <- data.frame(x = which(p$data$position == 1))
+    df2$y <- p$data$geneList[df2$x]
+    p.pos <- p + geom_segment(data=df2, aes_(x=~x, xend=~x, y=~y, yend=0),
+                              color="black")
+    p.pos <- p.pos + ggplot2::ylab("Ranked List Metric") +
+      ggplot2::xlim(0, length(p$data$geneList))
+    p.pos <- p.pos + ggplot2::geom_hline(yintercept=0, linetype = 2, color = "grey")
+  }
+  
+  
+  # Add additional plot showing correlation
+  df2$correlation <- p$data$correlation[df2$x]
+  p.correlation <- ggplot2::ggplot(df2, aes(x = x, xend = x, y = 0, yend = 1, color = cut(correlation, breaks = c(-Inf, -0.1, 0.1, Inf),
+                                                                                          labels = c("Negative", "Neutral", "Positive")))) +
+    ggplot2::geom_segment(size = 1) +
+    ggplot2::scale_color_manual(values = c("Negative" = "#004B7A", "Neutral" = "white", "Positive" = "#A83708")) +
+    my_theme() +
+    ggplot2::theme(legend.position = "none",
+                   axis.ticks.x = element_blank(),
+                   axis.ticks.y = element_blank(),
+                   axis.text.x = element_blank(),
+                   axis.text.y = element_blank(),
+                   axis.title.x = element_blank(),
+                   axis.title.y = element_blank())
+  
+  # Return plots based on the 'by' parameter
+  if (by == "runningScore") {
+    return(p.res + ggplot2::ggtitle(title))
+  }
+  if (by == "preranked") {
+    return(p.pos + ggplot2::ggtitle(title))
+  }
+  
+  # Combine plots if 'by' is "all"
+  p.res <- p.res + xlab(NULL) + ggplot2::theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+  p.res <- p.res + ggtitle(title)
+  return(aplot::gglist(gglist = list(p.res, p.correlation, p.pos), ncol = 1, heights = c(1, 0.2, 1)))
+}

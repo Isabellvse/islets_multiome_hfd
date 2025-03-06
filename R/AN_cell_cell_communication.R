@@ -420,6 +420,16 @@ receiver_oi = "Beta"
 ligand_oi = c("Tnf", "Ifnb1")
 sender_oi = "Immune"
 
+# get top 30 ligand and receptor links for tnf and ifnb1
+hfd1_tnf_ifnb1 <- prioritized_tbl_oi_HFD1_30 %>% 
+  dplyr::filter(ligand == "Tnf" | ligand == "Ifnb1") %>% 
+  dplyr::pull("id")
+
+hfd3_tnf_ifnb1 <- prioritized_tbl_oi_HFD3_30 %>% 
+  dplyr::filter(ligand == "Tnf" | ligand == "Ifnb1") %>% 
+  dplyr::pull("id")
+
+
 # Extract information about ligand of interest and group of interest
 lr_target_prior_cor_filtered = multinichenet_output$lr_target_prior_cor %>%
   dplyr::inner_join(multinichenet_output$ligand_activities_targets_DEgenes$ligand_activities %>%
@@ -428,7 +438,8 @@ lr_target_prior_cor_filtered = multinichenet_output$lr_target_prior_cor %>%
   dplyr::filter(group %in% group_oi,
                 receiver %in% receiver_oi,
                 sender %in% sender_oi,
-                ligand %in% ligand_oi)
+                ligand %in% ligand_oi,
+                id %in% c(hfd1_tnf_ifnb1, hfd3_tnf_ifnb1))
 
 # Get upregulated target genes, which have a correlation above 0.5 between target gene expression and
 # the product of ligand and recepter expression
@@ -484,7 +495,7 @@ myBreaks <- seq(-1.5, 1.5, length.out = 100)
 
 pdf(here::here("data/nichenet/beta/figures/nichenet_expression_of_target_genes_pseudobulk.pdf"),
     width = 3,
-    height = 4)
+    height = 4) %>% 
 beta %>%
   as.data.frame() %>%
   tibble::rownames_to_column("gene") %>%
@@ -492,7 +503,7 @@ beta %>%
   tibble::column_to_rownames("gene") %>%
   as.matrix() %>%
   pheatmap::pheatmap(scale = "row", cluster_rows = TRUE,
-                     cluster_cols = FALSE,
+                     cluster_cols = FALSE, %>% 
                      color = myCol,
                      border_color = NA,
                      breaks = myBreaks, fontsize_row = 2)

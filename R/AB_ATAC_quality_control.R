@@ -225,7 +225,10 @@ p7 <- Map(ggPoint_plot,
           .df = df,
           .title = names(df))
 
-patchwork::wrap_plots(p7, ncol = 7) + patchwork::plot_layout(guides = "collect")
+p7[2:7] <- purrr::map(p7[2:7], ~ .x + ggplot2::theme(axis.title.y = element_blank()))
+patchwork::wrap_plots(p7, ncol = 7) + patchwork::plot_layout(guides = "collect") & 
+  ggplot2::guides(colour = ggplot2::guide_colourbar(barwidth = 0.5, barheight = 6/2),
+                  size = "none") 
 dev.off()
 
 # Filter Archr files ------------------------------------------------------

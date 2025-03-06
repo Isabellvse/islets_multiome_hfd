@@ -248,6 +248,7 @@ plot_pca <- function(rld, cluster){
       ggplot2::ggtitle(base::paste0(cluster)) +
         ggplot2::scale_color_manual(values = sample_color) +
       my_theme() +
+      ggplot2::scale_y_continuous(breaks = scales::pretty_breaks(n = 7), position = "left") +
       ggplot2::coord_cartesian(clip = "off") + 
       ggplot2::theme(legend.position = "none")
     return(output)
@@ -372,8 +373,8 @@ volcano_2 <- function(df, padj_thres, logfc_thres, title) {
         ggrastr::geom_point_rast(shape=21,color= "lightgrey", fill = "lightgray", size=0.1) +
 
         # Add color to significant results
-        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange <= -logfc_thres), shape=21, color ='#004B7A', fill = '#004B7A', size = 0.5) +
-        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange >= logfc_thres), shape=21, color ='#A83708', fill = '#A83708', size = 0.5) +
+        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange <= -logfc_thres), shape=21, color ='#004B7A', fill = '#004B7A', size = 0.1) +
+        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange >= logfc_thres), shape=21, color ='#A83708', fill = '#A83708', size = 0.1) +
 
         # Add lines
         ggplot2::geom_vline(xintercept = c(0, logfc_thres, -logfc_thres),
@@ -388,16 +389,16 @@ volcano_2 <- function(df, padj_thres, logfc_thres, title) {
                                dplyr::filter(padj <= padj_thres & log2FoldChange <= -logfc_thres) %>%
                                dplyr::summarise(n = n()),
                            aes(label = paste0("n(genes) = ", n), x = -Inf, y = Inf), color = '#1465AC',
-                           hjust = -0.5, vjust = 1.5, size = 2) +
+                           hjust = -0.5, vjust = 1.5, size = 0.5) +
         ggplot2::geom_text(data= df_2 %>%
                                dplyr::filter(padj <= padj_thres & log2FoldChange >= logfc_thres) %>%
                                dplyr::summarise(n = n()),
                            aes(label = paste0("n(genes) = ", n), x = -Inf, y = Inf), color = '#B31B21',
-                           hjust = -0.5, vjust = 3, size = 2) +
+                           hjust = -0.5, vjust = 3, size = 0.5) +
 
         # Add text to top 10 significant genes
-        ggplot2::geom_text(data=sig_down, aes(x=label_x, y=label_y, label=gene), size = 2, hjust=1) +
-        ggplot2::geom_text(data=sig_up, aes(x=label_x, y=label_y, label=gene), size = 2, hjust=0) +
+        ggplot2::geom_text(data=sig_down, aes(x=label_x, y=label_y, label=gene), size = 0.5, hjust=1) +
+        ggplot2::geom_text(data=sig_up, aes(x=label_x, y=label_y, label=gene), size = 0.5, hjust=0) +
 
         # Draw lines from labels to points
         ggplot2::geom_segment(data=sig_down, aes(x = log2FoldChange, y = -log10(padj), xend = label_x, yend = label_y), color = "#004B7A", alpha = 0.5) +
@@ -408,10 +409,7 @@ volcano_2 <- function(df, padj_thres, logfc_thres, title) {
         ggplot2::xlab("log2 fold change") +
         ggplot2::ylab("-log10 adjusted p-value") +
         ggplot2::ggtitle(paste0(title)) +
-        ggprism::theme_prism(border = T,
-                             base_fontface = "plain",
-                             base_size = 6) +
-        ggplot2::coord_cartesian(clip = "off") +
+      my_theme() +
         ggplot2::expand_limits(x = c(min(df_2$log2FoldChange) - 6, max(df_2$log2FoldChange) + 6))
 
     return(output)
@@ -458,8 +456,8 @@ volcano_genes <- function(df, padj_thres, logfc_thres, title, genes_up, genes_do
         ggrastr::geom_point_rast(shape=21,color= "lightgrey", fill = "lightgray", size=0.1) +
 
         # Add color to significant results
-        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange <= -logfc_thres), shape=21, color ='#004B7A', fill = '#004B7A', size = 0.5) +
-        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange >= logfc_thres), shape=21, color ='#A83708', fill = '#A83708', size = 0.5) +
+        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange <= -logfc_thres), shape=21, color ='#004B7A', fill = '#004B7A', size = 0.1) +
+        ggrastr::geom_point_rast(data=subset(df_2, padj <= padj_thres & log2FoldChange >= logfc_thres), shape=21, color ='#A83708', fill = '#A83708', size = 0.1) +
 
         # Add lines
         ggplot2::geom_vline(xintercept = c(0, logfc_thres, -logfc_thres),
@@ -474,16 +472,16 @@ volcano_genes <- function(df, padj_thres, logfc_thres, title, genes_up, genes_do
                                dplyr::filter(padj <= padj_thres & log2FoldChange <= -logfc_thres) %>%
                                dplyr::summarise(n = n()),
                            aes(label = paste0("n(genes) = ", n), x = -Inf, y = Inf), color = '#1465AC',
-                           hjust = -0.5, vjust = 1.5, size = 2) +
+                           hjust = -0.5, vjust = 1.5, size = 0.5) +
         ggplot2::geom_text(data= df_2 %>%
                                dplyr::filter(padj <= padj_thres & log2FoldChange >= logfc_thres) %>%
                                dplyr::summarise(n = n()),
                            aes(label = paste0("n(genes) = ", n), x = -Inf, y = Inf), color = '#B31B21',
-                           hjust = -0.5, vjust = 3, size = 2) +
+                           hjust = -0.5, vjust = 3, size = 0.5) +
 
         # Add text to top 10 significant genes
-        ggplot2::geom_text(data=sig_down, aes(x=label_x, y=label_y, label=gene), size = 2, hjust=1) +
-        ggplot2::geom_text(data=sig_up, aes(x=label_x, y=label_y, label=gene), size = 2, hjust=0) +
+        ggplot2::geom_text(data=sig_down, aes(x=label_x, y=label_y, label=gene), size = 1, hjust=1) +
+        ggplot2::geom_text(data=sig_up, aes(x=label_x, y=label_y, label=gene), size = 1, hjust=0) +
 
         # Draw lines from labels to points
         ggplot2::geom_segment(data=sig_down, aes(x = log2FoldChange, y = -log10(padj), xend = label_x, yend = label_y), color = "#004B7A", alpha = 0.5) +
@@ -494,10 +492,7 @@ volcano_genes <- function(df, padj_thres, logfc_thres, title, genes_up, genes_do
         ggplot2::xlab("log2 fold change") +
         ggplot2::ylab("-log10 adjusted p-value") +
         ggplot2::ggtitle(paste0(title)) +
-        ggprism::theme_prism(border = T,
-                             base_fontface = "plain",
-                             base_size = 6) +
-        ggplot2::coord_cartesian(clip = "off") +
+        my_theme() +
         ggplot2::expand_limits(x = c(min(df_2$log2FoldChange) - 6, max(df_2$log2FoldChange) + 6))
 
     return(output)
@@ -1039,6 +1034,7 @@ gg_num_genes <- function(df, cell_type_levels){
     ggplot2::geom_bar(position = position_dodge(), stat = "identity") +
     ggplot2::scale_fill_manual(values = cluster_anno) +
     ggplot2::labs(y = "# DEGs") +
+    ggplot2::scale_y_continuous(breaks = scales::pretty_breaks(n = 7), position = "left") +
     my_theme() +
     ggplot2::theme(legend.position = "none",
                    axis.title.x = element_blank())
@@ -1054,6 +1050,8 @@ gg_augur_score <- function(df, cell_type_levels){
         ggplot2::geom_bar(position = position_dodge(), stat = "identity") +
         ggplot2::scale_fill_manual(values = cluster_anno) +
         ggplot2::labs(y = "Prioritization score \n(snRNA-seq)") +
+      ggplot2::scale_y_continuous(breaks = scales::pretty_breaks(n = 7), position = "left") +
+      ggplot2::coord_cartesian(ylim=c(0.5, 0.8)) +
       my_theme() +
         ggplot2::theme(legend.position = "none",
                        axis.title.x = element_blank())
@@ -1161,10 +1159,7 @@ go_term_wald <- function(test_genes, test_cell, bg_genes, bg_cell){
                           N = as.numeric(sub("^\\d+/", "", as.character(BgRatio))),
                           j_path = k/((n + M) - k),
                           j_bg = M/((N + M) - M),
-                          is_sig = case_when(p.adjust <= 0.0001 ~ "****",
-                                             p.adjust <= 0.001 ~ "****",
-                                             p.adjust <= 0.01 ~ "**",
-                                             p.adjust <= 0.05 ~ "*",
+                          is_sig = case_when(p.adjust <= 0.05 ~ "*",
                                              p.adjust > 0.05 ~ "ns"))
         }
 
@@ -1248,11 +1243,7 @@ gg_go_term_wald <- function(res, way) {
                     xlab("Jaccard similarity index") +
                     ylab(NULL) +
                     ggtitle(paste0(cluster, " Down")) +
-                    ggprism::theme_prism(
-                        border = T,
-                        base_fontface = "plain",
-                        base_size = 12
-                    ) +
+                  my_theme()+
                     ggplot2::theme(legend.title = element_text())
             }
 
@@ -1265,5 +1256,78 @@ gg_go_term_wald <- function(res, way) {
     output <- plot %>% patchwork::wrap_plots(ncol = 1)
 
     return(output)
+}
+
+
+
+#' run GO-term analysis with cluster profiler
+#'
+#' @param test_genes a dataframe of deseq2 results
+#' @param bg_genes a dataframe of all genes tested in deseq2
+#'
+#' @return a clusterprofiler go term object
+go_term <- function(test_genes, bg_genes){
+  
+  
+  # add entrez IDs to genes
+  test_genes$entrez = AnnotationDbi::mapIds(org.Mm.eg.db::org.Mm.eg.db,
+                                            keys=rownames(test_genes),
+                                            column="ENTREZID",
+                                            keytype="SYMBOL",
+                                            multiVals="first")
+  
+  
+  # Add entrez IDs to background genes
+  bg_genes$entrez = AnnotationDbi::mapIds(org.Mm.eg.db::org.Mm.eg.db,
+                                          keys=rownames(bg_genes),
+                                          column="ENTREZID",
+                                          keytype="SYMBOL",
+                                          multiVals="first")
+  
+  # Create universe - this should be any gene that could have been positive
+  # And I guess that should be all genes that were tested
+  
+  my_universe <- bg_genes %>%
+    as.data.frame() %>%
+    filter(!is.na(entrez)) %>%
+    pull(entrez) %>%
+    unlist() %>%
+    unname() %>%
+    unique()
+  
+  # Pathway analysis with clusterprofiler + jaccard index
+  
+  # Jaccard
+  # k is the overlap between your genes-of-interest and the geneset
+  # n is the number of all unique genes-of-interest
+  
+  # BgRatio=M/N
+  
+  # M is the number of genes within each geneset
+  # N is the number of all unique genes across all genesets (universe)
+  
+  output <- test_genes %>%
+    dplyr::select(entrez) %>%
+    purrr::as_vector() %>%
+    unname() %>%
+    unique() %>%
+    clusterProfiler::enrichGO(OrgDb = "org.Mm.eg.db",
+                              pAdjustMethod = "fdr",
+                              ont = "BP",
+                              pvalueCutoff  = 0.2,
+                              qvalueCutoff  = 0.2,
+                              readable      = TRUE,
+                              universe = my_universe
+    ) %>%
+    dplyr::mutate(k = as.numeric(sub("/\\d+$", "", as.character(GeneRatio))),
+                  n = as.numeric(sub("^\\d+/", "", as.character(GeneRatio))),
+                  M = as.numeric(sub("/\\d+$", "", as.character(BgRatio))),
+                  N = as.numeric(sub("^\\d+/", "", as.character(BgRatio))),
+                  j_path = k/((n + M) - k),
+                  j_bg = M/((N + M) - M),
+                  is_sig = case_when(p.adjust <= 0.05 ~ "*",
+                                     p.adjust > 0.05 ~ "ns"))
+  
+  return(output)
 }
 
