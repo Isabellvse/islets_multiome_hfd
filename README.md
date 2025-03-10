@@ -22,7 +22,7 @@ The following folders contain:
 
 # Workflow
 
-![Overview of analysis workflow](https://github.com/Isabellvse/islets_multiome/blob/main/illustrations/workflow.png)
+![Overview of analysis workflow](https://github.com/Isabellvse/islets_multiome_hfd/blob/main/illustrations/workflow.png)
 
 ###### *Illustration of workflow, and what scripts are used at each step. Illustration was created with [Excalidraw](https://excalidraw.com/)*
 
