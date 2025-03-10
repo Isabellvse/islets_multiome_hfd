@@ -16,8 +16,7 @@ To capture the early genomic changes within islets of Langerhans following short
 The following folders contain:
 
 -   `preprocessing/`: This folder contains scripts for alignment of snRNA and snATAC-seq data
--   `R/`: This folder contains scripts for quality control and analysis performed in R
--   `islets_scenic_plus/`: This folder contains scripts SCENIC+ analysis performed in python
+-   `R/`: This folder contains scripts for quality control and analysis performed in R and python
 -   `libraries/`: Different versions of packages are used in this analysis (indicated in each script). This file contains session info for each library.
 -   `illustrations/`: Illustrations used for this readme file
 
