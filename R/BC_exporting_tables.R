@@ -220,22 +220,22 @@ table_24 <- readRDS(here::here("data/inflammatory_cluster/files/genes_by_pathway
 table_26 <- seurat_5@meta.data %>% BiocGenerics::as.data.frame()
 table_27 <- seurat_beta@meta.data %>% BiocGenerics::as.data.frame()
 # combine the tables ------------------------------------------------------
-table_list <- list("table_8" = table_8,
-                   "table_9" = table_9,
-                   "table_10" = table_10,
-                   "table_11" = table_11,
-                   "table_12" = table_12,
-                   "table_13" = table_13,
-                   "table_14" = table_14,
-                   "table_15" = table_15,
-                   "table_16" = table_16,
-                   "table_17" = table_17,
-                   "table_18" = table_18,
-                   "table_19" = table_19,
-                   "table_20" = table_20,
-                   "table_24" = table_20,
-                   "table_26" = table_20,
-                   "table_27" = table_20)
+table_list <- list("Table 8" = table_8,
+                   "Table 9" = table_9,
+                   "Table 10" = table_10,
+                   "Table 11" = table_11,
+                   "Table 12" = table_12,
+                   "Table 13" = table_13,
+                   "Table 14" = table_14,
+                   "Table 15" = table_15,
+                   "Table 16" = table_16,
+                   "Table 17" = table_17,
+                   "Table 18" = table_18,
+                   "Table 19" = table_19,
+                   "Table 20" = table_20,
+                   "Table 24" = table_20,
+                   "Table 26" = table_20,
+                   "Table 27" = table_20)
 
 # save --------------------------------------------------------------------
 openxlsx::write.xlsx(table_list, here::here("data/export/tables.xlsx"))                   
