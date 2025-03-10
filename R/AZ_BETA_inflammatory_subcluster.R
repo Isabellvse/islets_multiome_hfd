@@ -196,7 +196,7 @@ go_term_top10 <- purrr::map(list("up" = go_res_up, "down" = go_res_down), functi
   purrr::modify_depth(1, ~ dplyr::bind_rows(., .id = "comparison")) %>% 
   dplyr::bind_rows(.id = "direction")
 
-openxlsx::write.xlsx(go_term_top10, here::here("data/inflammatory_cluster/files/top10go.rds"))
+openxlsx::write.xlsx(go_term_top10, here::here("data/inflammatory_cluster/files/top10go.xlsx"))
 
 # significant results -----------------------------------------------------
 results_sig <- list()
@@ -794,7 +794,7 @@ lfd_upper_q <- seurat_beta@meta.data %>%
                                                   .default = condition),
                 Inflammatory_response = factor(Inflammatory_response, levels = c("LFD", "HFD_1", "HFD_3_low", "HFD_3_high"))) %>%
   dplyr::filter(Inflammatory_response == "LFD") %>%
-  dplyr::select(orig.ident, upr, ins, Inflammatory_response) %>%
+  dplyr::select(orig.ident, upr_ucell, ins_ucell, Inflammatory_response) %>%
   tidyr::pivot_longer(c(-Inflammatory_response, -orig.ident), names_to = "gene", values_to = "score") %>%
   dplyr::group_by(gene, Inflammatory_response) %>%
   dplyr::summarize(uppr_quartile = stats::quantile(score, na.rm = TRUE, probs = 0.75)) %>%
@@ -850,13 +850,13 @@ df <- seurat_beta@meta.data %>%
     TRUE ~ condition
   ),
   Inflammatory_response = factor(Inflammatory_response, levels = c("LFD", "HFD_1", "HFD_3_low", "HFD_3_high"))) %>%
-  dplyr::select(orig.ident, upr, ins, Inflammatory_response)
+  dplyr::select(orig.ident, upr_ucell, ins_ucell, Inflammatory_response)
 
 ## ECDF plots ----
 # First plot (ECDF plots)
-ecdf_plot_ins <- ggplot2::ggplot(df, aes(x = ins, color = Inflammatory_response)) +
+ecdf_plot_ins <- ggplot2::ggplot(df, aes(x = ins_ucell, color = Inflammatory_response)) +
   ggplot2::stat_ecdf(size = 1) +
-  ggplot2::geom_vline(xintercept = lfd_upper_q["ins"], linetype = "dashed") +
+  ggplot2::geom_vline(xintercept = lfd_upper_q["ins_ucell"], linetype = "dashed") +
   ggplot2::labs(x = "Score", y = "% of cells") +
   ggplot2::scale_y_reverse() +
   ggplot2::scale_color_manual(values = c("LFD" = "#004B7A", "HFD_1" = "#c71500", "HFD_3_low" = "grey", "HFD_3_high" = "#FA8231")) +
@@ -864,9 +864,9 @@ ecdf_plot_ins <- ggplot2::ggplot(df, aes(x = ins, color = Inflammatory_response)
   ggplot2::theme(legend.position = "none")
 
 # Second plot (ECDF plots)
-ecdf_plot_upr <- ggplot(df, aes(x = upr, color = Inflammatory_response)) +
+ecdf_plot_upr <- ggplot(df, aes(x = upr_ucell, color = Inflammatory_response)) +
   ggplot2::stat_ecdf(size = 1) +
-  ggplot2::geom_vline(xintercept = lfd_upper_q["upr"], linetype = "dashed") +
+  ggplot2::geom_vline(xintercept = lfd_upper_q["upr_ucell"], linetype = "dashed") +
   ggplot2::labs(x = "Score", y = "% of cells") +
   ggplot2::scale_y_reverse() +
   ggplot2::scale_color_manual(values = c("LFD" = "#004B7A", "HFD_1" = "#c71500", "HFD_3_low" = "grey", "HFD_3_high" = "#FA8231")) +
@@ -875,8 +875,20 @@ ecdf_plot_upr <- ggplot(df, aes(x = upr, color = Inflammatory_response)) +
 
 ggsave(here::here("data/inflammatory_cluster/figures/ins__upr_ucell_cumulative_perc.pdf"),
        plot = gridExtra::grid.arrange(ecdf_plot_ins, ecdf_plot_upr, ncol = 2),
-       width = 2, height = 1)
+       width = 3, height = 1)
 
 
 # Save seurat -------------------------------------------------------------
 saveRDS(seurat_beta, here::here("data/inflammatory_cluster/files/seurat_beta.rds"))
+
+
+p <- seurat_beta@meta.data %>% 
+  ggplot2::ggplot(aes(x = inflammatory_ucell, color = condition)) +
+  ggplot2::geom_density() +
+  ggplot2::scale_color_manual(values =condition_color) +
+  my_theme() +
+  ggplot2::theme(legend.position = "none")
+
+ggsave(here::here("data/inflammatory_cluster/figures/infalmmatory_definition_density.pdf"),
+       plot = p,
+       width = 1.5, height = 1)

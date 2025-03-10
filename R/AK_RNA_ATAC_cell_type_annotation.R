@@ -240,6 +240,16 @@ df <- seurat_5@meta.data %>%
 
 utils::write.csv(df, file = here::here("data/dimensional_reduction/wnn/celltype_annotation/manual/manual_annotation_percofendocrinecells_condition.csv"))
 
+
+# Perc of cells - per condition -------------------------------------------
+
+df <- seurat_5@meta.data %>%
+  as.data.frame() %>%
+  dplyr::group_by(condition, manual_anno) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::mutate(perc = round((n/sum(n))*100, 2))
+utils::write.csv(df, file = here::here("data/dimensional_reduction/wnn/celltype_annotation/manual/manual_annotation_percofallcells_condition.csv"))
+
 ### Number of cells per replicate
 ### Number of cells in each cluster - per condition ----
 df <- seurat_5@meta.data %>%

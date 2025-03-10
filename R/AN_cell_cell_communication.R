@@ -503,7 +503,7 @@ beta %>%
   tibble::column_to_rownames("gene") %>%
   as.matrix() %>%
   pheatmap::pheatmap(scale = "row", cluster_rows = TRUE,
-                     cluster_cols = FALSE, %>% 
+                     cluster_cols = FALSE, 
                      color = myCol,
                      border_color = NA,
                      breaks = myBreaks, fontsize_row = 2)
