@@ -233,9 +233,9 @@ table_list <- list("Table 8" = table_8,
                    "Table 18" = table_18,
                    "Table 19" = table_19,
                    "Table 20" = table_20,
-                   "Table 24" = table_20,
-                   "Table 26" = table_20,
-                   "Table 27" = table_20)
+                   "Table 24" = table_24,
+                   "Table 26" = table_26,
+                   "Table 27" = table_27)
 
 # save --------------------------------------------------------------------
 openxlsx::write.xlsx(table_list, here::here("data/export/tables.xlsx"))                   
