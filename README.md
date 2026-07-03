@@ -74,7 +74,7 @@ The following folders contain:
 
 #### Run SCENIC+ analysis in phyton
 
--   `R/`: *Package versions: libraries/scenic_plus.txt*
+-   `Python/`: *Package versions: libraries/scenic_plus.txt*
     -   `AO_BETA_scenic_plus.sh`: Run the entire SCENIC+ pipeline
     -   `AQ_BETA_scenicplus_export_data.sh`: Export data from the scenicplus object, such as eRegulon meta data, and transcription factor motifs associated with each eRegulon
 
@@ -96,6 +96,17 @@ The following folders contain:
     -   `AZ_BETA_inflammatory_subcluster.R`: Generate an inflammatory gene set of putative tnf and ifnb1 target genes (found in script 14_cell_cell_communication.R), and catagorize β-cells into a high inflammatory subpopulation or low inflammatory subpopulation based on the gene module activity score of the inflammatory geneset with the β-cell, and find differentially expressed genes between subtypes and more. 
     -   `BA_PUBLIC_inflammatory_signal_cohort_1` and `BB_PUBLIC_inflammatory_signal_cohort_2`: For public data, calculate gene module activity scores with the same genes as in AX_BETA_inflammatory_subcluster.R, in human beta-cells from non-diabetes, prediabetic, type 1 diabetic and type 2 diabeteic individuals. 
 
+#### Revisions
+-   `R/`: *Package versions: libraries/r_library.txt*
+    -   `BE_revisions_BETA_inflammatory_subcluster`: We visualize inflammatory low and high β-cells in the UMAP. We also subcluster β-cells, to see if this subtype emerges natively, as well as find DEGs for this subtype.
+-   `Python/`: *Package versions: libraries/pip_list_revisions.txt*
+    -   `BF_revisions_image_analysis_feature_extraction`: Image background correction, islet and nuclei segmentation, and feature extraction of images
+-   `R/`: *Package versions: libraries/r_revisions.txt*
+    -   `BG_revisions_image_analysis_prepare_data`: prepare feature extracted data, generate unique islet and cell ids, as well as save islet windows as rds object
+    -   `BH_revisions_imaging_analysis_stat1_high_cells`: Find STAT1 high β-cells using different percentile thresholds, and quantify in HFD and LFD
+    -   `BI_revisions_imaging_analysis_segregation`: Test is β-cells that contain both STAT1 high and low cells are segregated within each islet
+    -   `BJ_revisions_imaging_analysis_spatial_occupancy`: Test is β-cells that contain both STAT1 high and low cells, do STAT1 high prefecentially occupy the islet pheriphery or the core?
+
 #### Other scripts
 
 -   `R/`:
@@ -106,6 +117,8 @@ The following folders contain:
     -   `functions.R`: functions for tasks
     -   `functions_deseq2.R`: functions used for DEseq2 analysis and plotting
     -   `function_ArchRtoSignac.R`: function used to transfer data from ArchR to seurat
+    -   `functions.py`: functions used for image preprocessing and feature extraction
+    -   `functions_revisions.R`: functions used for revisions
 
 ##### Documents
 `meta.xlsx`: meta data for each sample
