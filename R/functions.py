@@ -590,18 +590,18 @@ def extract_features(path, folder_name, image_name):
 def extract_features_spatial(path, folder_name, image_name):
 
     img_path = str(here(f'{path}/{folder_name}/{image_name}.nd2'))
-    bg_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/background/{folder_name}')
-    spatial_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/spatial/{folder_name}')
-    seg_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/segmentation/{folder_name}')
-    comb_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/combined/{folder_name}')
-    measure_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/measure/{folder_name}')
-    islet_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/measure_islet/{folder_name}')
-    cell_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/measure_cell/{folder_name}')
-    file_path_islet = os.path.join(str(here()), f'data/spatial_lfd_hfd/files/{folder_name}')
-    file_path_cell = os.path.join(str(here()), f'data/spatial_lfd_hfd/files/{folder_name}')
+    bg_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/background/{folder_name}')
+    spatial_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/spatial/{folder_name}')
+    seg_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/segmentation/{folder_name}')
+    comb_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/combined/{folder_name}')
+    measure_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/measure/{folder_name}')
+    islet_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/measure_islet/{folder_name}')
+    cell_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/measure_cell/{folder_name}')
+    file_path_islet = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/files/{folder_name}')
+    file_path_cell = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/files/{folder_name}')
 
     # Create directories
-    os.makedirs(os.path.join(str(here()), f'data/spatial_lfd_hfd/'), exist_ok=True)
+    os.makedirs(os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/'), exist_ok=True)
     os.makedirs(bg_path, exist_ok=True) 
     os.makedirs(spatial_path, exist_ok=True) 
     os.makedirs(seg_path, exist_ok=True) 
@@ -907,7 +907,7 @@ def extract_insulin_masks(path, folder_name, image_name):
     """
     
     img_path = str(here(f'{path}/{folder_name}/{image_name}.nd2'))
-    masks_path = os.path.join(str(here()), f'data/spatial_lfd_hfd/insulin_masks/{folder_name}')
+    masks_path = os.path.join(str(here()), f'data/revisions/spatial_lfd_hfd/insulin_masks/{folder_name}')
     
     # Create directory
     os.makedirs(masks_path, exist_ok=True)
