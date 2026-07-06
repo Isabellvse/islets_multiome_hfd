@@ -4,16 +4,16 @@
 
 # Setup -------------------------------------------------------------------
 source(here::here("islets_multiome_hfd/R/set_up_revisions.R"))
-create_directories(here::here("data/resivionspercentile/plots"))
-create_directories(here::here("data/resivionspercentile/files"))
+create_directories(here::here("data/resivions/percentile/plots"))
+create_directories(here::here("data/resivions/percentile/files"))
 set.seed(1000)
 
 # Load --------------------------------------------------------------------
-cell <- vroom::vroom(here::here("data/resivionspercentile/files/cell_data_status.csv")) |> 
+cell <- vroom::vroom(here::here("data/resivions/percentile/files/cell_data_status.csv")) |> 
   dplyr::mutate(diet = factor(diet, diet_lvl))
-islet <- vroom::vroom(here::here("data/resivionsspatial_lfd_hfd/islet_data.csv")) |> 
+islet <- vroom::vroom(here::here("data/resivions/spatial_lfd_hfd/islet_data.csv")) |> 
   dplyr::mutate(diet = factor(diet, diet_lvl))
-window_list <- readRDS(here::here("data/resivionsspatial_lfd_hfd/window_list.rds"))
+window_list <- readRDS(here::here("data/resivions/spatial_lfd_hfd/window_list.rds"))
 
 # Prepare data ------------------------------------------------------------
 per_cell_or <- cell |> 
@@ -63,7 +63,7 @@ figlocation <- per_cell_or[["stat1_status_p95_or"]] |>
     legend.position = "right"
   )
 
-ggsave(plot = figlocation, filename = here::here("data/resivionspercentile/plots/spatial_localization_core_edge_p95.png"), 
+ggsave(plot = figlocation, filename = here::here("data/resivions/percentile/plots/spatial_localization_core_edge_p95.png"), 
        dpi = 300,
        width = 20, height = 10)
 
@@ -75,10 +75,10 @@ perm_test <- names(per_cell_or) |>
     per_cell_or[[percentile]] |> 
       perm_func()
   }, .id = "percentile")
-vroom::vroom_write(perm_test, here::here("data/resivionspercentile/files/core_periphety_permutation_test.csv"))
+vroom::vroom_write(perm_test, here::here("data/resivions/percentile/files/core_periphety_permutation_test.csv"))
 plan(sequential)
 
-pdf(here::here("data/resivionspercentile/plots/core_edge_test.pdf"), 
+pdf(here::here("data/resivions/percentile/plots/core_edge_test.pdf"), 
     width = 1.2, height = 1.5)
 perm_test |> 
   dplyr::filter(term == "locationedge") |> 
