@@ -13,3 +13,4 @@ macs2_env
 run_output
 R/not_used
 r_library
+*.ipynb_checkpoints
