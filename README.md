@@ -20,13 +20,6 @@ The following folders contain:
 -   `libraries/`: Different versions of packages are used in this analysis (indicated in each script). This file contains session info for each library.
 -   `illustrations/`: Illustrations used for this readme file
 
-# Workflow
-
-![Overview of analysis workflow](https://github.com/Isabellvse/islets_multiome_hfd/blob/main/illustrations/workflow.png)
-
-###### *Illustration of workflow, and what scripts are used at each step. Illustration was created with [Excalidraw](https://excalidraw.com/)*
-
-
 # Description of scripts
 
 ### Alignment in terminal
@@ -97,7 +90,7 @@ The following folders contain:
     -   `BA_PUBLIC_inflammatory_signal_cohort_1` and `BB_PUBLIC_inflammatory_signal_cohort_2`: For public data, calculate gene module activity scores with the same genes as in AX_BETA_inflammatory_subcluster.R, in human beta-cells from non-diabetes, prediabetic, type 1 diabetic and type 2 diabeteic individuals. 
 
 #### Revisions
--   `R/`: *Package versions: libraries/r_library.txt*
+-   `R/`: *Package versions: see in the script*
     -   `BE_revisions_BETA_inflammatory_subcluster`: We visualize inflammatory low and high β-cells in the UMAP. We also subcluster β-cells, to see if this subtype emerges natively, as well as find DEGs for this subtype.
 -   `Python/`: *Package versions: libraries/pip_list_revisions.txt*
     -   `BF_revisions_image_analysis_feature_extraction`: Image background correction, islet and nuclei segmentation, and feature extraction of images
