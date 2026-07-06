@@ -2,7 +2,7 @@
 # Heterogenity of cells that have high STAT1 expression
 
 # Setup -------------------------------------------------------------------
-source(here::here("islets_multiome_hfd/R/set_up_revisions.R"))
+source(here::here("R/set_up_revisions.R"))
 create_directories(here::here("data/revisions/percentile/plots"))
 create_directories(here::here("data/revisions/percentile/files"))
 
