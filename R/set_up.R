@@ -1,5 +1,5 @@
 # Set library path
-.libPaths("/work/Home/islets_multiome/r_library")
+.libPaths(here::here("r_library/"))
 
 # source files
 base::source(here::here("R/package_load.R"))
