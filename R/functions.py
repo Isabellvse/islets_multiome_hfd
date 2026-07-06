@@ -33,6 +33,24 @@ def clear_matplotlib_cache():
   
 # Load data ----------------------------------------------------------------
 def load_image(path):
+  """
+    Load a multichannel ND2 microscopy image and extract specific fluorescence channels.
+
+    Parameters
+    ----------
+    path : str or list of str
+        Path to the ND2 image file. If a list is given, the first path in the
+        list is used and the rest are ignored.
+
+    Returns
+    -------
+    insulin : numpy.ndarray
+        Image data for the FITCprc20x (insulin) channel.
+    stat1 : numpy.ndarray
+        Image data for the TRITCprv20x (STAT1) channel.
+    dapi : numpy.ndarray
+        Image data for the DAPIprv20x1 (DAPI/nuclear) channel.
+"""
     if isinstance(path, list):
         path = path[0]
 
@@ -47,6 +65,21 @@ def load_image(path):
     return insulin, stat1, dapi
   
 def get_pixel_size(path, default=1.0):
+    """
+    Retrieve the pixel size (in microns) from an ND2 image's metadata.
+
+    Parameters
+    ----------
+    path : str
+        Path to the ND2 file.
+    default : float, optional
+        Value to return if pixel size metadata is missing (default 1.0).
+
+    Returns
+    -------
+    float
+        Pixel size in microns per pixel.
+    """
 
     img = ND2Reader(path)
     px_size = img.metadata.get("pixel_microns")
@@ -59,6 +92,28 @@ def get_pixel_size(path, default=1.0):
 
 # Remove background ------------------------------------------------------
 def iterative_average(img, n_iter=10, window=15, epsilon=0.5):
+  """
+  Create a baseline image for background correction using iterative smoothing.
+  
+  Parameters
+  ----------
+  img : numpy.ndarray
+    Input image data.
+  n_iter : int, optional
+      Maximum number of smoothing iterations to perform (default 10).
+  window : int, optional
+      Size of the uniform filter window used for smoothing (default 15).
+  epsilon : float, optional
+      Convergence threshold: if the mean absolute pixel change between
+      the current and previous baseline is at or below this value,
+      iteration stops early (default 0.5).
+      
+      
+    Returns
+    -------
+    numpy.ndarray
+        Estimated baseline (background) image, same shape as `img`.
+  """
     baseline = img.copy()
     
     for i in range(n_iter):
@@ -77,6 +132,24 @@ def iterative_average(img, n_iter=10, window=15, epsilon=0.5):
 
 # Segmentation ----------------------------------------------------------
 def segment_insulin(insulin):
+  """
+  Segment insulin-positive regions from a fluorescence image.
+
+  Parameters
+  ----------
+  insulin : numpy.ndarray
+      2D grayscale image of the insulin fluorescence channel.
+
+  Returns
+  -------
+  mask : numpy.ndarray (bool)
+      Binary mask of segmented insulin-positive regions after cleanup.
+  mask_label : numpy.ndarray (int)
+      Label image where each connected region in `mask` has a unique
+      integer ID.
+  th : float
+      Otsu threshold value used to generate the initial binary mask.
+  """
 
     th = ski.filters.threshold_otsu(insulin)
 
@@ -89,7 +162,26 @@ def segment_insulin(insulin):
     return mask, mask_label, th
 
 def segment_dapi(dapi):
+  """
+  Segment individual nuclei from a DAPI fluorescence image.
 
+  Parameters
+  ----------
+  dapi : numpy.ndarray
+      2D grayscale image of the DAPI (nuclear) channel.
+
+  Returns
+  -------
+  mask : numpy.ndarray (bool)
+      Binary mask of thresholded DAPI-positive regions.
+  labels : numpy.ndarray (int)
+      Label image of individually segmented nuclei after watershed
+      splitting and small-object removal.
+  expanded : numpy.ndarray (int)
+      Label image with each nucleus label expanded outward by 8 pixels.
+  th : float
+      Otsu threshold value used for the initial binary mask.
+  """
     th = ski.filters.threshold_otsu(dapi)
     mask = dapi > th
 
@@ -888,10 +980,6 @@ def extract_features_spatial(path, folder_name, image_name):
         
     pd.DataFrame(islet_df).to_csv(os.path.join(file_path_islet, f'{image_name}_islet.csv'), index = False)
     pd.DataFrame(cell_df).to_csv(os.path.join(file_path_cell, f'{image_name}_cell.csv'), index = False)
-
-
-
-# Add this to your functions.py
 
 import os
 import json

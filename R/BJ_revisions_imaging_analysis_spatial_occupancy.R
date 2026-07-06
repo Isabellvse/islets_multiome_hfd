@@ -3,7 +3,7 @@
 # But defined as logodss
 
 # Setup -------------------------------------------------------------------
-source(here::here("islets_multiome_hfd/R/set_up_revisions.R"))
+source(here::here("R/set_up_revisions.R"))
 create_directories(here::here("data/resivions/percentile/plots"))
 create_directories(here::here("data/resivions/percentile/files"))
 set.seed(1000)
