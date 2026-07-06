@@ -6,7 +6,7 @@ source(here::here("islets_multiome_hfd/R/set_up_revisions.R"))
 # Load --------------------------------------------------------------------
 # Cell data ----
 cell <- list.files(
-  here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/files"),
+  here::here("data/revisions/spatial_lfd_hfd/files"),
   pattern = "_cell\\.csv$",
   recursive = TRUE,
   full.names = TRUE
@@ -23,7 +23,7 @@ cell <- list.files(
 
 # Islet data ----
 islet <- list.files(
-  here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/files"),
+  here::here("data/revisions/spatial_lfd_hfd/files"),
   pattern = "_islet\\.csv$",
   recursive = TRUE,
   full.names = TRUE
@@ -39,7 +39,7 @@ islet <- list.files(
 
 # Insulin mask ----
 insulin <- data.frame("path" = list.files(
-  here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/insulin_masks"),
+  here::here("data/revisions/spatial_lfd_hfd/insulin_masks"),
   pattern = "_insulin_masks\\.json$",
   recursive = TRUE,
   full.names = TRUE)) |> 
@@ -52,7 +52,7 @@ insulin <- data.frame("path" = list.files(
 
 # Load all insulin masks
 insulin <- data.frame("path" = list.files(
-  here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/insulin_masks"),
+  here::here("data/revisions/spatial_lfd_hfd/insulin_masks"),
   pattern = "_insulin_masks\\.json$",
   recursive = TRUE,
   full.names = TRUE)) |>
@@ -143,7 +143,7 @@ windows_df <- purrr::map2_df(
 )
 
 # Save --------------------------------------------------------------------
-vroom::vroom_write(cell, here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/cell_data.csv"))
-vroom::vroom_write(islet, here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/islet_data.csv"))
-vroom::vroom_write(windows_df, here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/window_data.csv"))
-saveRDS(window_list, here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/window_list.rds"))
+vroom::vroom_write(cell, here::here("data/revisions/spatial_lfd_hfd/cell_data.csv"))
+vroom::vroom_write(islet, here::here("data/revisions/spatial_lfd_hfd/islet_data.csv"))
+vroom::vroom_write(windows_df, here::here("data/revisions/spatial_lfd_hfd/window_data.csv"))
+saveRDS(window_list, here::here("data/revisions/spatial_lfd_hfd/window_list.rds"))

@@ -3,13 +3,13 @@
 
 # Setup -------------------------------------------------------------------
 source(here::here("islets_multiome_hfd/R/set_up_revisions.R"))
-create_directories(here::here("islets_multiome_hfd/data/revisions/percentile/plots"))
-create_directories(here::here("islets_multiome_hfd/data/revisions/percentile/files"))
+create_directories(here::here("data/revisions/percentile/plots"))
+create_directories(here::here("data/revisions/percentile/files"))
 
 # Load --------------------------------------------------------------------
-cell <- vroom::vroom(here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/cell_data/revisions.csv")) |> 
+cell <- vroom::vroom(here::here("data/revisions/spatial_lfd_hfd/cell_data/revisions.csv")) |> 
   dplyr::mutate(diet = factor(diet, diet_lvl))
-islet <- vroom::vroom(here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/islet_data/revisions.csv")) |> 
+islet <- vroom::vroom(here::here("data/revisions/spatial_lfd_hfd/islet_data/revisions.csv")) |> 
   dplyr::mutate(diet = factor(diet, diet_lvl))
 
 logic_types <- c("and", "only_peri", "only_nuc", "or")
@@ -32,7 +32,7 @@ percentile_data/revisions <- cell |>
   dplyr::mutate(percentile = stringr::str_remove(percentile, "value_"))
 
 # Plot distribution with percentile lines
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/stat1_intensity_distribution_cell.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/stat1_intensity_distribution_cell.pdf"), 
     width = 4, height = 2.5)
 cell |> 
   dplyr::select(stat1_nucleus_mean, stat1_peri_mean) |>
@@ -151,7 +151,7 @@ plot_islet <- purrr::map(percentiles, ~ {
 
 long <- map(plot_islet, ~wrap_plots(.x, ncol = 1))
 
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/pct_stat1_high_per_islet.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/pct_stat1_high_per_islet.pdf"), 
     width = 15, height = 15)
 wrap_plots(long, nrow = 1)
 dev.off()
@@ -200,7 +200,7 @@ plot_mouse<- purrr::map(percentiles, ~ {
 })
 
 long <- map(plot_mouse, ~wrap_plots(.x, ncol = 1))
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/pct_stat1_high_per_mouse.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/pct_stat1_high_per_mouse.pdf"), 
     width = 15, height = 15)
 wrap_plots(long, nrow = 1)
 dev.off()
@@ -242,7 +242,7 @@ per_mouse_or <- per_mouse_or_wilcox |>
 
 
 # Plot mean values --------------------------------------------------------
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/high_or_mean_point.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/high_or_mean_point.pdf"), 
     width = 2.5, height = 2.5)
 bind_rows(
   per_mouse_or |> 
@@ -334,15 +334,15 @@ p2 <- per_islet |>
   ggpubr::stat_regline_equation(color = "brown", label.y.npc = 0.8) +
   ggplot2::facet_wrap(~percentiles, nrow = 1) +
   my_theme()
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/area_hfd_high_stat1_correlation.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/area_hfd_high_stat1_correlation.pdf"), 
     width = 5, height = 3)
 p1/p2
 dev.off()
 # Save --------------------------------------------------------------------
-vroom::vroom_write(per_mouse_or, here::here("islets_multiome_hfd/data/revisions/percentile/files/wilcox_test_per_mouse_or.csv"))
-vroom::vroom_write(cell, here::here("islets_multiome_hfd/data/revisions/percentile/files/cell_data/revisions_status.csv"))
+vroom::vroom_write(per_mouse_or, here::here("data/revisions/percentile/files/wilcox_test_per_mouse_or.csv"))
+vroom::vroom_write(cell, here::here("data/revisions/percentile/files/cell_data/revisions_status.csv"))
 
-cell <- vroom::vroom(here::here("islets_multiome_hfd/data/revisions/percentile/files/cell_data/revisions_status.csv"))
+cell <- vroom::vroom(here::here("data/revisions/percentile/files/cell_data/revisions_status.csv"))
 cell %>% dplyr::group_by(unique_islet, stat1_status_p95_or) %>% 
   tally() %>% 
   tidyr::pivot_wider(names_from = stat1_status_p95_or, values_from = n) %>% 

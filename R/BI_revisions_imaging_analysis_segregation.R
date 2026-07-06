@@ -4,16 +4,16 @@
 # Setup -------------------------------------------------------------------
 source(here::here("islets_multiome_hfd/R/functions.R"))
 #source(here::here("islets_multiome_hfd/R/prepare data.R"))
-create_directories(here::here("islets_multiome_hfd/data/revisions/percentile/plots"))
-create_directories(here::here("islets_multiome_hfd/data/revisions/percentile/files"))
+create_directories(here::here("data/revisions/percentile/plots"))
+create_directories(here::here("data/revisions/percentile/files"))
 set.seed(100)
 
 # Load --------------------------------------------------------------------
-cell <- vroom::vroom(here::here("islets_multiome_hfd/data/revisions/percentile/files/cell_data_status.csv")) |> 
+cell <- vroom::vroom(here::here("data/revisions/percentile/files/cell_data_status.csv")) |> 
   dplyr::mutate(diet = factor(diet, diet_lvl))
-islet <- vroom::vroom(here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/islet_data.csv")) |> 
+islet <- vroom::vroom(here::here("data/revisions/spatial_lfd_hfd/islet_data.csv")) |> 
   dplyr::mutate(diet = factor(diet, diet_lvl))
-window_list <- readRDS(here::here("islets_multiome_hfd/data/revisions/spatial_lfd_hfd/window_list.rds"))
+window_list <- readRDS(here::here("data/revisions/spatial_lfd_hfd/window_list.rds"))
 
 # Preprocess --------------------------------------------------------------
 # Create list of status
@@ -48,7 +48,7 @@ per_islet <- per_cell_or |>
 
 
 # Distribution of pct high islets -----------------------------------------
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/stat1_high_islet_hfd_histogram.pdf"), width = 4, height = 1.5)
+pdf(here::here("data/revisions/percentile/plots/stat1_high_islet_hfd_histogram.pdf"), width = 4, height = 1.5)
 per_islet |> 
   dplyr::filter(diet == "hfd") |> 
   dplyr::mutate(
@@ -104,12 +104,12 @@ seg_results <- results  |>
   dplyr::left_join(per_islet)
 
 # save --------------------------------------------------------------------
-saveRDS(results, here::here("islets_multiome_hfd/data/revisions/percentile/files/segregation_test.rds"))
-vroom::vroom_write(seg_results, here::here("islets_multiome_hfd/data/revisions/percentile/files/segregation_test_results.csv"))
+saveRDS(results, here::here("data/revisions/percentile/files/segregation_test.rds"))
+vroom::vroom_write(seg_results, here::here("data/revisions/percentile/files/segregation_test_results.csv"))
 
 # Load again --------------------------------------------------------------
-results <- readRDS(here::here("islets_multiome_hfd/data/revisions/percentile/files/segregation_test.rds"))
-seg_results <- vroom::vroom(here::here("islets_multiome_hfd/data/revisions/percentile/files/segregation_test_results.csv"))
+results <- readRDS(here::here("data/revisions/percentile/files/segregation_test.rds"))
+seg_results <- vroom::vroom(here::here("data/revisions/percentile/files/segregation_test_results.csv"))
 
 # Estimates the spatially-varying probability -----------------------------
 vr_results <- 
@@ -126,12 +126,12 @@ vr_results <-
   })
 
 # Save --------------------------------------------------------------------
-saveRDS(vr_results, here::here("islets_multiome_hfd/data/revisions/percentile/files/relative_riskt.rds"))
-vr_results <- readRDS(here::here("islets_multiome_hfd/data/revisions/percentile/files/relative_riskt.rds"))
+saveRDS(vr_results, here::here("data/revisions/percentile/files/relative_riskt.rds"))
+vr_results <- readRDS(here::here("data/revisions/percentile/files/relative_riskt.rds"))
 
 # QC segregation test -----------------------------------------------------
 ## Are significant islets imbalanced by high/low ratio of cells
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/segregation_test_high_low_ratio.pdf"), width = 8, height = 3)
+pdf(here::here("data/revisions/percentile/plots/segregation_test_high_low_ratio.pdf"), width = 8, height = 3)
 seg_results |>
   dplyr::mutate(
     ratio_high_low = cells_high / cells_low,
@@ -174,7 +174,7 @@ seg_summary <- seg_results |>
   )
 
 # Save --------------------------------------------------------------------
-vroom::vroom_write(seg_summary, here::here("islets_multiome_hfd/data/revisions/percentile/files/segregation_test_summary.csv"))
+vroom::vroom_write(seg_summary, here::here("data/revisions/percentile/files/segregation_test_summary.csv"))
 
 # Plot results (islets)------------------------------------------------------------
 # Create lookup table for significance
@@ -215,19 +215,19 @@ plot_list_pp <- purrr::imap(vr_results, \(percentile_islets, percentile) {
 # Save plots --------------------------------------------------------------
 ## pp
 for (name in names(plot_list_pp)) {
-  pdf(here::here(paste0("islets_multiome_hfd/data/revisions/percentile/plots/pp_plots_high_low_", name, ".pdf")))
+  pdf(here::here(paste0("data/revisions/percentile/plots/pp_plots_high_low_", name, ".pdf")))
   print(plot_ordered_by_stat(plot_list_pp, seg_results, name))
   dev.off()
 }
 
 # relrisk
 for (name in names(plot_list)) {
-  pdf(here::here(paste0("islets_multiome_hfd/data/revisions/percentile/plots/relative_risk_plots_high_low_", name, ".pdf")))
+  pdf(here::here(paste0("data/revisions/percentile/plots/relative_risk_plots_high_low_", name, ".pdf")))
   print(plot_ordered_by_stat(plot_list, seg_results, name))
   dev.off()
 }
 # relrisk with legend
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/relative_risk_plots_high_low_legend.pdf"))
+pdf(here::here("data/revisions/percentile/plots/relative_risk_plots_high_low_legend.pdf"))
 plot_list_legend[["stat1_status_p95_or"]][["hfd_0617_2_Seq0131_1"]]
 dev.off()
 
@@ -235,7 +235,7 @@ dev.off()
 
 # Overall descriptives ----------------------------------------------------
 # Of islets that has more than 1 identity, how many islets are not randomly distributed?
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/pct_segregated_islets.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/pct_segregated_islets.pdf"), 
     width = 1.5, height = 2.5)
 seg_results |> 
   dplyr::mutate(seg = dplyr::case_when(fdr < 0.05 ~ "segregated",
@@ -272,7 +272,7 @@ seg_results |>
 dev.off()
 
 # how many of them ARE randomly distributed?
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/pct_nonsegregated_islets.pdf"), 
+pdf(here::here("data/revisions/percentile/plots/pct_nonsegregated_islets.pdf"), 
     width = 1.5, height = 1.5)
 seg_results |> 
   dplyr::mutate(seg = dplyr::case_when(fdr < 0.05 ~ "segregated",
@@ -320,7 +320,7 @@ row_dist <- dist(seg_results_wide, method = "euclidean")
 row_hclust <- hclust(row_dist, method = "complete")
 row_order <- rownames(seg_results_wide)[row_hclust$order]
 
-pdf(here::here("islets_multiome_hfd/data/revisions/percentile/plots/segregated_islet_heatmap.pdf"), width = 1.8, height = 3)
+pdf(here::here("data/revisions/percentile/plots/segregated_islet_heatmap.pdf"), width = 1.8, height = 3)
 seg_results |> 
   dplyr::select(unique_islet, percentiles, fdr) |> 
   dplyr::mutate(
