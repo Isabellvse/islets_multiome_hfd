@@ -3,7 +3,24 @@
 # "Examine heterogeneity in inflammatory response in greater detail using existing data (Reviewer 2 point 7)." 
 
 # Setup -------------------------------------------------------------------
-base::source(here::here("R/set_up_revisions.R"))
+# R version 4.5.3
+# In terminal
+# sudo apt-get update
+# sudo apt-get install build-essential libcurl4-openssl-dev libssl-dev libxml2-dev
+# sudo apt-get install zlib1g-dev libbz2-dev liblzma-dev
+# sudo apt-get install autoconf automake
+# Install specific version
+remotes::install_version("Seurat", version = "4.4.0")
+remotes::install_version("SeuratObject", version = "4.1.4")
+setRepositories(ind=1:3)
+remotes::install_version("Signac", version = "1.11.0")
+install.packages("edgeR")
+install.packages("DESeq2")
+library(Seurat)
+library(Signac)
+library(dplyr)
+library(ggplot2)
+
 set.seed(1000)
 create_directories(c(here::here("data/revisions/")))
 
