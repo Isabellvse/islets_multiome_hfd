@@ -29,7 +29,12 @@ create_directories <- function(output_dir) {
 }
 
 # Load insulin mask -------------------------------------------------------
-# Helper function to create owin from JSON mask data
+#' Helper function to create owin from JSON mask data
+#'
+#' @param json_path path to json file
+#' @param islet_id character string, islet id
+#'
+#' @returns retuns An object of the class owin (observation window in the two-dimensional plane)
 create_window_from_json <- function(json_path, islet_id) {
   # Read the JSON file
   masks_list <- jsonlite::read_json(json_path)
@@ -42,13 +47,18 @@ create_window_from_json <- function(json_path, islet_id) {
   }
   
   # Create owin object
-  owin(poly = list(
+  spatstat.geom::owin(poly = list(
     x = unlist(mask_data$x),
     y = unlist(mask_data$y)
   ))
 }
 
-# Convert owin to data frame for plotting
+#' Convert owin into a dataframe - to be used for plotting
+#'
+#' @param window owin object
+#' @param unique_id A character string, islet id 
+#'
+#' @returns A data frame 
 window_to_df <- function(window, unique_id = NULL) {
   if (is.null(window)) return(NULL)
   
@@ -65,7 +75,14 @@ window_to_df <- function(window, unique_id = NULL) {
 
 
 # Segregation test --------------------------------------------------------
-# make ppp object
+
+#' Create a point pattern object on x and y positions
+#'
+#' @param islet_data a dataframe
+#' @param islet_name a character string
+#' @param marks marks of each point, e.g. "high" or "low"
+#'
+#' @returns A ppp object
 make_ppp <- function(islet_data, islet_name, marks) {
   spatstat.geom::ppp(
     x = islet_data$centroid_x_px,
@@ -75,6 +92,13 @@ make_ppp <- function(islet_data, islet_name, marks) {
   )
 }
 
+#' Function for segregation test and permutation analysis
+#'
+#' @param islet_data A data frame
+#' @param islet_name Name of islet
+#' @param nsim Number of permutations to perform (default = 999)
+#'
+#' @returns A list 
 segregation_test <- function(islet_data, islet_name, nsim = 999){
   if (length(unique(islet_data$stat1_status)) < 2) return(NULL)
   
@@ -91,12 +115,19 @@ segregation_test <- function(islet_data, islet_name, nsim = 999){
 }
 
 
+#' Perform Estimate of Spatially-Varying Relative Risk on islets
+#'
+#' @param islet_data a dataframe
+#' @param islet_name islet name
+#' @param sigma what bandwith to use
+#'
+#' @returns A list
 relrisk_test <- function(islet_data, islet_name, sigma){
   pp_all <- make_ppp(islet_data, islet_name, factor(islet_data$stat1_status, levels = c("low", "high")))
   
   list(
     pp = pp_all,
-    vr = relrisk(pp_all, sigma =sigma, casecontrol = TRUE)
+    vr = spatstat.explore::relrisk(pp_all, sigma =sigma, casecontrol = TRUE)
   )
 }
 
@@ -196,7 +227,11 @@ plot_ordered_by_stat <- function(plot_list, seg_results, percentile_name, ncol =
 
 
 # spatial occupancy -------------------------------------------------------
-# Functions ---------------------------------------------------------------
+#' Prepare data spatial analysis
+#'
+#' @param df A data frane
+#'
+#' @returns A data frame
 prep_data <- function(df) {
   prep_df <- df |> 
     # Group by islet and structural zone
@@ -212,6 +247,11 @@ prep_data <- function(df) {
   return(prep_df)
 }
 
+#' Define model for spatial analysis
+#'
+#' @param prep_df A data frame (from prepare data)
+#'
+#' @returns A data frame
 model_fun <- function(prep_df) {
   # Fits the proportion model while controlling for islet-to-islet variation
   model <- glmmTMB::glmmTMB(
@@ -225,6 +265,13 @@ model_fun <- function(prep_df) {
   return(model_results)
 }
 
+#' Perform permutation test on spatial analysis data
+#'
+#' @param df A data frame 
+#' @param model_results A data frame
+#' @param n_perm Number of permutations (default = 999)
+#'
+#' @returns A data frame
 perm_model <- function(df, model_results, n_perm = 999){
   observed_intercept <- model_results |> dplyr::filter(term == "(Intercept)") |> dplyr::pull(estimate)
   observed_periphery <- model_results |> dplyr::filter(stringr::str_detect(term, "locationedge")) |> dplyr::pull(estimate)
@@ -263,11 +310,11 @@ perm_model <- function(df, model_results, n_perm = 999){
     purrr::list_rbind() |> 
     tidyr::drop_na() # Cleanly discard any failed/unconverged permutation steps
   
-  # TWO-TAILED P-VALUES (Checks for extreme clustering in EITHER direction)
+  # two tailed p-values (Checks for extreme clustering in EITHER direction)
   perm_p_2tail_periphery <- (sum(abs(perm_coefs$periphery) >= abs(observed_periphery)) + 1) / (nrow(perm_coefs) + 1)
   perm_p_2tail_intercept <- (sum(abs(perm_coefs$intercept) >= abs(observed_intercept)) + 1) / (nrow(perm_coefs) + 1)
   
-  # ONE-TAILED P-VALUES (Checks if edge enrichment is greater than the null)
+  # one tailed p-values (Checks if edge enrichment is greater than the null)
   if (observed_periphery >= 0) {
     perm_p_1tail_periphery <- (sum(perm_coefs$periphery >= observed_periphery) + 1) / (nrow(perm_coefs) + 1)
   } else {
@@ -290,6 +337,11 @@ perm_model <- function(df, model_results, n_perm = 999){
   return(results)
 }
 
+#' Master function spatial analysis
+#'
+#' @param df A data frame
+#'
+#' @returns A data frame
 perm_func <- function(df) {
   prep_df       <- prep_data(df)
   model_results <- model_fun(prep_df = prep_df)
@@ -344,13 +396,13 @@ plot_islet <- function(islet_name, cell, status_col, percentile = 0.8, save_plot
     ggplot2::scale_fill_gradientn(
       colors = rev(roma(256)),
       oob = scales::squish,
-      limits = c(0, q_nuc_islet),  # Now using islet-specific quantile
+      limits = c(0, q_nuc_islet),  # Using islet-specific quantile
       name = "Nucleus"
     ) +
     ggplot2::scale_color_gradientn(
       colors = rev(roma(256)),
       oob = scales::squish,
-      limits = c(0, q_peri_islet),  # Now using islet-specific quantile
+      limits = c(0, q_peri_islet),  # Usingislet-specific quantile
       name = "Perinuclear\nspace"
     ) +
     ggplot2::scale_y_reverse() +
