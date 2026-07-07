@@ -10,7 +10,7 @@ To investigate early adaptive changes to short-term HFD, we fed eleven-week-old 
 
 To capture the early genomic changes within islets of Langerhans following short-term HFD exposure, we utilized a single-nucleus method known as chromium single-cell multiome ATAC + Gene expression from 10X Genomics (snMultiome) using nuclei from isolated islets. snMultiome enables simultaneous capture of gene expression data and chromatin accessibility data from the same single nuclei through RNA-sequencing (snRNA-seq) and transposase-accessible chromatin with sequencing (snATAC-seq), respectively.
 
-![Illustration of work](https://github.com/Isabellvse/islets_multiome/blob/main/illustrations/graphical_abstract.png)
+![Illustration of work](illustrations/graphical_abstract.png)
 
 # Brief description of folder
 
