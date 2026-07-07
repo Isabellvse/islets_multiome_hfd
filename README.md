@@ -1,16 +1,8 @@
 # Unveiling Early Responses of Mouse β-Cells to High Fat Diet feeding through Single-Cell Multiome Analysis
 
-Isabell Victoria Strandby Ernst, Lasse Lehtonen, Sille Marie Nilsson, Freja Louise Nielsen, Ann-Britt Marcher, Susanne Mandrup, Jesper Grud Skat Madsen
-
-bioRxiv 2025.04.01.646568; doi: <https://doi.org/10.1101/2025.04.01.646568>
-
 [Link to our preprint](https://www.biorxiv.org/content/10.1101/2025.04.01.646568v1)
 
-To investigate early adaptive changes to short-term HFD, we fed eleven-week-old male C57BL/6JBomTac mice with a HFD (60% energy from fat) or purified low-fat diet (LFD) (10% energy from fat) as a control, for one and three weeks.
-
-To capture the early genomic changes within islets of Langerhans following short-term HFD exposure, we utilized a single-nucleus method known as chromium single-cell multiome ATAC + Gene expression from 10X Genomics (snMultiome) using nuclei from isolated islets. snMultiome enables simultaneous capture of gene expression data and chromatin accessibility data from the same single nuclei through RNA-sequencing (snRNA-seq) and transposase-accessible chromatin with sequencing (snATAC-seq), respectively.
-
-![Illustration of work](illustrations/graphical_abstract.png)
+<p align="center"><img src="https://github.com/Isabellvse/islets_multiome_hfd/blob/main/illustrations/graphical%20abstract.png" width="500"></p>
 
 # Brief description of folder
 
