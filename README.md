@@ -1,15 +1,16 @@
 # Unveiling Early Responses of Mouse β-Cells to High Fat Diet feeding through Single-Cell Multiome Analysis
 
+Isabell Victoria Strandby Ernst, Lasse Lehtonen, Sille Marie Nilsson, Freja Louise Nielsen, Ann-Britt Marcher, Susanne Mandrup, Jesper Grud Skat Madsen
+
+bioRxiv 2025.04.01.646568; doi: <https://doi.org/10.1101/2025.04.01.646568>
+
+[Link to our preprint](https://www.biorxiv.org/content/10.1101/2025.04.01.646568v1)
+
 To investigate early adaptive changes to short-term HFD, we fed eleven-week-old male C57BL/6JBomTac mice with a HFD (60% energy from fat) or purified low-fat diet (LFD) (10% energy from fat) as a control, for one and three weeks.
 
 To capture the early genomic changes within islets of Langerhans following short-term HFD exposure, we utilized a single-nucleus method known as chromium single-cell multiome ATAC + Gene expression from 10X Genomics (snMultiome) using nuclei from isolated islets. snMultiome enables simultaneous capture of gene expression data and chromatin accessibility data from the same single nuclei through RNA-sequencing (snRNA-seq) and transposase-accessible chromatin with sequencing (snATAC-seq), respectively.
 
 ![Illustration of work](https://github.com/Isabellvse/islets_multiome/blob/main/illustrations/github_image.png)
-
-###### *A) Schematic overview of the experimental setup: 8-week-old male C57BL/6JBomTac mice underwent a three-week acclimatization period during which they were fed a low-fat-diet (LFD). Subsequently, mice were divided into groups receiving either LFD (orange, as a control) or high-fat-diet (blue, HFD) for one or three weeks.* 
-###### *B) Macronutrient composition of LFD (7 % energy from sucrose 10 % energy from fat) and HFD (7 % energy from sucrose, 60 % energy from fat) presented in % Kcal.* 
-###### C) *Illustration of proposed mechanism: Following one week of HFD (HFD 1 wk) feeding UPR-mediated stress and transcriptional downregulation of β-cell identity genes in most β-cells, as well as induction of an inflammatory response in a small subset of β-cells (orange cells). After three weeks of HFD (HFD 3 wk), the UPR stress is resolved, but the subset of β-cells with an inflammatory response is increased. In β-cells without an inflammatory response, β-cell identity gene transcription is partially re-stored, but not in β-cells with an inflammatory response. Read arrows indicate upregulation and blue arrows indicate downregulation.*
-
 
 # Brief description of folder
 
@@ -86,10 +87,11 @@ The following folders contain:
 
 -   `R/`: *Package versions: libraries/r_library.txt*
     -   `AY_PUBLIC_gluco_lipo_cyto_treatment`: Prepare public scRNA-seq data from human islets treated with various stressors for analysis, and calculate gene module activity scores of gene clusters identified in 16_differential_expression_analysis_pseudobulk.R within these human β-cells.
-    -   `AZ_BETA_inflammatory_subcluster.R`: Generate an inflammatory gene set of putative tnf and ifnb1 target genes (found in script 14_cell_cell_communication.R), and catagorize β-cells into a high inflammatory subpopulation or low inflammatory subpopulation based on the gene module activity score of the inflammatory geneset with the β-cell, and find differentially expressed genes between subtypes and more. 
-    -   `BA_PUBLIC_inflammatory_signal_cohort_1` and `BB_PUBLIC_inflammatory_signal_cohort_2`: For public data, calculate gene module activity scores with the same genes as in AX_BETA_inflammatory_subcluster.R, in human beta-cells from non-diabetes, prediabetic, type 1 diabetic and type 2 diabeteic individuals. 
+    -   `AZ_BETA_inflammatory_subcluster.R`: Generate an inflammatory gene set of putative tnf and ifnb1 target genes (found in script 14_cell_cell_communication.R), and catagorize β-cells into a high inflammatory subpopulation or low inflammatory subpopulation based on the gene module activity score of the inflammatory geneset with the β-cell, and find differentially expressed genes between subtypes and more.
+    -   `BA_PUBLIC_inflammatory_signal_cohort_1` and `BB_PUBLIC_inflammatory_signal_cohort_2`: For public data, calculate gene module activity scores with the same genes as in AX_BETA_inflammatory_subcluster.R, in human beta-cells from non-diabetes, prediabetic, type 1 diabetic and type 2 diabeteic individuals.
 
 #### Revisions
+
 -   `R/`: *Package versions: see in the script*
     -   `BE_revisions_BETA_inflammatory_subcluster`: We visualize inflammatory low and high β-cells in the UMAP. We also subcluster β-cells, to see if this subtype emerges natively, as well as find DEGs for this subtype.
 -   `Python/`: *Package versions: libraries/pip_list_revisions.txt*
@@ -114,4 +116,5 @@ The following folders contain:
     -   `functions_revisions.R`: functions used for revisions
 
 ##### Documents
+
 `meta.xlsx`: meta data for each sample
