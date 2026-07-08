@@ -193,7 +193,7 @@ overview$overview_of_tables <- paste0("Table ", new_num)
 overview <- overview[order(new_num), ]
 tables[["Overview"]] <- overview
 
-# --- rename and reorder the tables list itself ---
+
 nm <- names(tables)
 num <- as.numeric(gsub("Table ", "", nm))  # NA for "Overview"
 
