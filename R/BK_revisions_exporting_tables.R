@@ -168,3 +168,55 @@ tables |>
 
 # save as xsls file 
 openxlsx::write.xlsx(tables, here::here("data/export/supplementary_files.xlsx"))   
+
+
+# Reorder tables again ----------------------------------------------------
+tables <- readxl::excel_sheets(here::here("data/export/supplementary_files.xlsx")) |> 
+  purrr::set_names() |> 
+  purrr::map(\(sheet){
+    readxl::read_xlsx(here::here("data/export/supplementary_files.xlsx"), 
+                      sheet = sheet) 
+  })
+
+mapping <- c(
+  "19" = 25, "20" = 26, "21" = 27, "22" = 28, "23" = 29, "24" = 30,
+  "25" = 31, "26" = 32, "27" = 33, "28" = 19, "29" = 20, "30" = 21,
+  "31" = 22, "32" = 23, "33" = 24, "34" = 34
+)
+
+overview <- tables[["Overview"]]
+old_num <- as.numeric(gsub("Table ", "", overview$overview_of_tables))
+new_num <- ifelse(as.character(old_num) %in% names(mapping),
+                  mapping[as.character(old_num)],
+                  old_num)
+overview$overview_of_tables <- paste0("Table ", new_num)
+overview <- overview[order(new_num), ]
+tables[["Overview"]] <- overview
+
+# --- rename and reorder the tables list itself ---
+nm <- names(tables)
+num <- as.numeric(gsub("Table ", "", nm))  # NA for "Overview"
+
+new_num_list <- ifelse(!is.na(num) & as.character(num) %in% names(mapping),
+                       mapping[as.character(num)],
+                       num)
+
+names(tables) <- ifelse(is.na(new_num_list), nm, paste0("Table ", new_num_list))
+
+tables <- tables[order(ifelse(is.na(new_num_list), -Inf, new_num_list))]
+
+names(tables)  # sanity check: "Overview" "Table 1" ... "Table 34"
+
+
+# Save again --------------------------------------------------------------
+# Save as tab seperated file 
+tables |> 
+  purrr::iwalk(\(table, name){
+    vroom::vroom_write(table, paste0(here::here("data/export/supplementary_files/"), name, ".tsv"))
+  })
+
+# Compress
+# tar -czvf supplementary_files.tar.gz ./supplementary_files
+
+# save as xsls file 
+openxlsx::write.xlsx(tables, here::here("data/export/supplementary_files.xlsx"))   
